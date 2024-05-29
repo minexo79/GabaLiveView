@@ -97,10 +97,6 @@ namespace ffmpegplayer.Video
                 {
                     Console.WriteLine("==> " + ex.Message);
                 }
-                finally
-                {
-                    Thread.Sleep(16);
-                }
             }
 
             return;
