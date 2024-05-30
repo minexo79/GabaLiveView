@@ -26,7 +26,7 @@
         </Grid.RowDefinitions>
         <views:SKElement Grid.Row="0" x:Name="canvas" PaintSurface="canvas_PaintSurface" />
         <ui:SimpleStackPanel Orientation="Horizontal" Grid.Row="1">
-            <TextBox x:Name="rtspInput" Text="rtsp://localhost:554/mihoyo" Width="320" Style="{StaticResource txtBoxStyle}" />
+            <TextBox x:Name="rtspInput" Text="rtsp://192.168.144.108:554/eo" Width="320" Style="{StaticResource txtBoxStyle}" />
             <Button x:Name="btnOpen" Content="Open" Click="ButtonOpen_Click" Style="{StaticResource btnStyle}" />
             <Button x:Name="btnStop" Content="Stop" Click="ButtonStop_Click" Style="{StaticResource btnStyle}" />
         </ui:SimpleStackPanel>

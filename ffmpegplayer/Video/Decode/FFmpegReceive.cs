@@ -76,7 +76,7 @@ namespace ffmpegplayer.Video.Decode
             // set optimize flag
             AVDictionary* options = null;
             ffmpeg.av_dict_set(&options, "rtsp_transport", "tcp", 0);
-            ffmpeg.av_dict_set(&options, "stimeout", "15000000", 0);        // max timeout 15 seconds
+            ffmpeg.av_dict_set(&options, "stimeout", "1000000", 0);         // max timeout 1 seconds
             ffmpeg.av_dict_set(&options, "fflags", "nobuffer", 0);          // no buffer
             ffmpeg.av_dict_set(&options, "fflags", "discardcorrupt", 0);    // discard corrupted frames
             ffmpeg.av_dict_set(&options, "flags", "low_delay", 0);          // no delay
@@ -197,8 +197,6 @@ namespace ffmpegplayer.Video.Decode
 
             while (CanRun)
             {
-                Thread.Sleep(5);
-
                 ffmpeg.av_frame_unref(pFrame);
                 ffmpeg.av_packet_unref(pPacket);
 
@@ -221,7 +219,8 @@ namespace ffmpegplayer.Video.Decode
                                                     pCodecContext->height, dstData, dstLinesize);
 
                                 // callback
-                                Callback((int)width, (int)height, convertedFrameBufferPtr, convertedFrameBufferSize);
+                                if (Callback != null)
+                                    Callback((int)width, (int)height, convertedFrameBufferPtr, convertedFrameBufferSize);
                             }
                         }
                     }

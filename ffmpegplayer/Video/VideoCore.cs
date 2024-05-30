@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Timer = System.Timers.Timer;
 
 namespace ffmpegplayer.Video
 {
@@ -26,6 +27,9 @@ namespace ffmpegplayer.Video
 
         Task startPlay, decodeImage;
 
+        Timer connectLostTimer;
+        DateTime lastFrameDateTime;
+
         public VideoCore(string url) 
         { 
             RtspUrl = url;
@@ -34,6 +38,15 @@ namespace ffmpegplayer.Video
         public void Dispose()
         {
             ffmpegReceive?.Dispose();
+        }
+
+        private void connectLostTimerCallback(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if ((DateTime.Now - lastFrameDateTime).Seconds > 1)
+            {
+                Stop();
+                Start();
+            }
         }
 
         public void Start()
@@ -46,6 +59,18 @@ namespace ffmpegplayer.Video
 
             decodeImage = new Task(() => startFFmpeg());
             decodeImage.Start();
+
+
+            if (connectLostTimer == null)
+            {
+                connectLostTimer = new Timer();
+                connectLostTimer.Interval = 5000;
+                connectLostTimer.Elapsed += connectLostTimerCallback;
+                connectLostTimer.AutoReset = true;
+            }
+
+            connectLostTimer.Start();
+            lastFrameDateTime = DateTime.Now;
         }
 
         void startFFmpeg()
@@ -71,6 +96,7 @@ namespace ffmpegplayer.Video
                 }
 
                 decodeBmpQueue.Enqueue(bmp);
+                lastFrameDateTime = DateTime.Now;
             }
             catch (Exception ex)
             {
@@ -97,6 +123,8 @@ namespace ffmpegplayer.Video
                 {
                     Console.WriteLine("==> " + ex.Message);
                 }
+
+                Thread.Sleep(16);   // 60fps
             }
 
             return;
@@ -107,12 +135,13 @@ namespace ffmpegplayer.Video
             if (ffmpegReceive != null)
             {
                 ffmpegReceive.Stop();
-                startPlay.Wait(1000, cts.Token);
 
-                cts.Cancel();
+                startPlay.Wait(1000, cts.Token);
                 decodeImage.Wait(1000, cts.Token);
+                cts.Cancel();
 
                 ffmpegReceive.Dispose();
+                connectLostTimer.Stop();
             }
         }
     }

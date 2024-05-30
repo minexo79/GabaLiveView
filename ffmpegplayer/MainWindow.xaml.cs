@@ -47,7 +47,7 @@ namespace ffmpegplayer
         {
             if (receiveArgs != null && receiveArgs.videoBmp != null)
             {
-                e.Surface.Canvas.DrawBitmap(receiveArgs.videoBmp, new SKPoint());
+                e.Surface.Canvas.DrawBitmap(receiveArgs.videoBmp, e.Info.Rect);
             }    
         }
 
