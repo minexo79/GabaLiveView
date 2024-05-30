@@ -19,52 +19,41 @@ namespace ffmpegplayer
     /// </summary>
     public partial class MainWindow : Window
     {
-        VideoCore core;
-        VideoReceiveArgs receiveArgs;
+        MainWindowViewModel vm = new MainWindowViewModel();
 
         public MainWindow()
         {
             InitializeComponent();
+
+            this.DataContext = vm;
+            this.DataContextChanged += OnDataContextChanged;
+;
         }
 
-        private void ButtonOpen_Click(object sender, RoutedEventArgs e)
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            this.Dispatcher.Invoke(() => btnOpen.IsEnabled = false);
-
-            core = new VideoCore(rtspInput.Text);
-            core.OnVideoReceived += Core_OnVideoReceived;
-            core.Start();
-        }
-
-        private void Core_OnVideoReceived(object? sender, VideoReceiveArgs e)
-        {
-            receiveArgs = e;
-
-            canvas.Dispatcher.Invoke(() => canvas.InvalidateVisual());
+            if (e.NewValue is MainWindowViewModel vm)
+            {
+                vm.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(vm.ReceiveArgs))
+                    {
+                        canvas.InvalidateVisual();
+                    }
+                };
+            }
         }
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
-            if (receiveArgs != null && receiveArgs.videoBmp != null)
+            if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
             {
-                e.Surface.Canvas.DrawBitmap(receiveArgs.videoBmp, e.Info.Rect);
-            }    
-        }
-
-        private void ButtonStop_Click(object sender, RoutedEventArgs e)
-        {
-            core.OnVideoReceived -= Core_OnVideoReceived;
-            core.Stop();
-
-            receiveArgs = null;                                         // 重置接收參數
-            canvas.Dispatcher.Invoke(() => canvas.InvalidateVisual());  // 重繪畫布
-
-            this.Dispatcher.Invoke(() => btnOpen.IsEnabled = true);
-        }
-
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            ButtonStop_Click(this, null);
+                e.Surface.Canvas.DrawBitmap(vm.ReceiveArgs.videoBmp, e.Info.Rect);
+            }
+            else
+            {
+                e.Surface.Canvas.Clear();
+            }
         }
     }
 }

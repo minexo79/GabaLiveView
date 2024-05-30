@@ -20,6 +20,7 @@ namespace ffmpegplayer.Video
 
         string RtspUrl;
         FFmpegReceive ffmpegReceive;
+        static object lockObj = new object();
 
         CancellationTokenSource cts;
         VideoReceiveArgs videoReceiveArgs;
@@ -42,9 +43,10 @@ namespace ffmpegplayer.Video
 
         private void connectLostTimerCallback(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            if ((DateTime.Now - lastFrameDateTime).Seconds > 1)
+            if (DateTime.Now.Subtract(lastFrameDateTime).TotalSeconds > 10)
             {
                 Stop();
+                Thread.Sleep(500);
                 Start();
             }
         }
@@ -53,7 +55,7 @@ namespace ffmpegplayer.Video
         {
             cts = new CancellationTokenSource();
 
-            startPlay = new Task(() => pushFrameToFrontend());
+            startPlay = new Task(() => GetImage());
             startPlay.Start();
 
 
@@ -64,7 +66,7 @@ namespace ffmpegplayer.Video
             if (connectLostTimer == null)
             {
                 connectLostTimer = new Timer();
-                connectLostTimer.Interval = 5000;
+                connectLostTimer.Interval = 10000;
                 connectLostTimer.Elapsed += connectLostTimerCallback;
                 connectLostTimer.AutoReset = true;
             }
@@ -85,18 +87,16 @@ namespace ffmpegplayer.Video
         {
             try
             {
-                SKBitmap bmp = new SKBitmap(width, height);
-                SKImageInfo imageInfo = new SKImageInfo(width, height, SKColorType.Rgb888x, SKAlphaType.Opaque);
-
-                bmp.InstallPixels(imageInfo, buffer, width * 4);
-
-                if (decodeBmpQueue.Count > 5)
+                lock (lockObj)      // for thread safe, process one thing at a time
                 {
-                    decodeBmpQueue.Dequeue();
-                }
+                    SKBitmap bmp = new SKBitmap(width, height);
+                    SKImageInfo imageInfo = new SKImageInfo(width, height, SKColorType.Rgb888x, SKAlphaType.Opaque);
 
-                decodeBmpQueue.Enqueue(bmp);
-                lastFrameDateTime = DateTime.Now;
+                    bmp.InstallPixels(imageInfo, buffer, width * 4);
+
+                    decodeBmpQueue.Enqueue(bmp);
+                    lastFrameDateTime = DateTime.Now;
+                }
             }
             catch (Exception ex)
             {
@@ -104,19 +104,25 @@ namespace ffmpegplayer.Video
             }
         }
 
-        void pushFrameToFrontend()
+        void GetImage()
         {
             while (!cts.Token.IsCancellationRequested)
             {
                 try
                 {
-                    if (decodeBmpQueue.Count > 0)
+                    lock (lockObj)  // for thread safe, process one thing at a time
                     {
-                        videoReceiveArgs = new VideoReceiveArgs();
-                        videoReceiveArgs.videoBmp = decodeBmpQueue.Dequeue();
+                        if (decodeBmpQueue.Count > 0)
+                        {
+                            videoReceiveArgs = new VideoReceiveArgs();
+                            videoReceiveArgs.videoBmp = decodeBmpQueue.Dequeue();
 
-                        if (OnVideoReceived != null)
-                            OnVideoReceived(this, videoReceiveArgs);
+                            if (videoReceiveArgs.videoBmp != null)
+                            {
+                                if (OnVideoReceived != null)
+                                    OnVideoReceived(this, videoReceiveArgs);
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -134,13 +140,15 @@ namespace ffmpegplayer.Video
         {
             if (ffmpegReceive != null)
             {
-                ffmpegReceive.Stop();
-
-                startPlay.Wait(1000, cts.Token);
-                decodeImage.Wait(1000, cts.Token);
+                startPlay.Wait(100, cts.Token);
+                decodeImage.Wait(100, cts.Token);
                 cts.Cancel();
 
+                decodeBmpQueue.Clear();
+
+                ffmpegReceive.Stop();
                 ffmpegReceive.Dispose();
+
                 connectLostTimer.Stop();
             }
         }
