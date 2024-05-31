@@ -26,22 +26,16 @@ namespace ffmpegplayer
             InitializeComponent();
 
             this.DataContext = vm;
-            this.DataContextChanged += OnDataContextChanged;
-;
-        }
+            videoInfoControl.DataContext = vm;
 
-        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (e.NewValue is MainWindowViewModel vm)
+            vm.onVideoDrawFrontend = (sender, e) =>
             {
-                vm.PropertyChanged += (s, e) =>
+                canvas.Dispatcher.Invoke(() =>
                 {
-                    if (e.PropertyName == nameof(vm.ReceiveArgs))
-                    {
-                        canvas.InvalidateVisual();
-                    }
-                };
+                    canvas.InvalidateVisual();
+                });
             }
+;
         }
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)

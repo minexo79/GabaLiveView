@@ -12,6 +12,10 @@ namespace ffmpegplayer.Video
     public class VideoReceiveArgs : EventArgs
     {
         public SKBitmap videoBmp { get; set; }
+        public int width { get; set; }
+        public int height { get; set; }
+        public float framerate { get; set; }
+        public float bitrate { get; set; }
     }
 
     internal class VideoCore
@@ -55,6 +59,7 @@ namespace ffmpegplayer.Video
         {
             cts = new CancellationTokenSource();
 
+            decodeBmpQueue.Clear();
             startPlay = new Task(() => GetImage());
             startPlay.Start();
 
@@ -92,10 +97,11 @@ namespace ffmpegplayer.Video
                     SKBitmap bmp = new SKBitmap(width, height);
                     SKImageInfo imageInfo = new SKImageInfo(width, height, SKColorType.Rgb888x, SKAlphaType.Opaque);
 
-                    bmp.InstallPixels(imageInfo, buffer, width * 4);
-
-                    decodeBmpQueue.Enqueue(bmp);
-                    lastFrameDateTime = DateTime.Now;
+                    if (bmp.InstallPixels(imageInfo, buffer, width * 4))
+                    {
+                        decodeBmpQueue.Enqueue(bmp);
+                        lastFrameDateTime = DateTime.Now;
+                    }
                 }
             }
             catch (Exception ex)
@@ -115,10 +121,16 @@ namespace ffmpegplayer.Video
                         if (decodeBmpQueue.Count > 0)
                         {
                             videoReceiveArgs = new VideoReceiveArgs();
+
                             videoReceiveArgs.videoBmp = decodeBmpQueue.Dequeue();
 
                             if (videoReceiveArgs.videoBmp != null)
                             {
+                                videoReceiveArgs.width = (int)ffmpegReceive.width;
+                                videoReceiveArgs.height = (int)ffmpegReceive.height;
+                                videoReceiveArgs.framerate = ffmpegReceive.framerate;
+                                videoReceiveArgs.bitrate = ffmpegReceive.bitrate;
+
                                 if (OnVideoReceived != null)
                                     OnVideoReceived(this, videoReceiveArgs);
                             }
@@ -140,16 +152,17 @@ namespace ffmpegplayer.Video
         {
             if (ffmpegReceive != null)
             {
-                startPlay.Wait(100, cts.Token);
-                decodeImage.Wait(100, cts.Token);
-                cts.Cancel();
+                connectLostTimer.Stop();
 
+                cts.Cancel();
                 decodeBmpQueue.Clear();
 
                 ffmpegReceive.Stop();
                 ffmpegReceive.Dispose();
 
-                connectLostTimer.Stop();
+                startPlay.Wait(100);
+                decodeImage.Wait(100);
+
             }
         }
     }

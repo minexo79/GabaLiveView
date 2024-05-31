@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,10 +14,13 @@ namespace ffmpegplayer.Video.Decode
     {
         // ffmpeg
         int videoStreamIndex        = -1;
-        float width                 = 0;
-        float height                = 0;
         AVPixelFormat srcPixfmt     = AVPixelFormat.AV_PIX_FMT_NONE;
         AVPixelFormat dstPixfmt     = AVPixelFormat.AV_PIX_FMT_NONE;
+
+        internal float width = 0;
+        internal float height = 0;
+        internal float framerate = 0;
+        internal float bitrate = 0;
 
         // rtsp url
         string RtspUrl;
@@ -180,6 +184,8 @@ namespace ffmpegplayer.Video.Decode
                 return;
             }
 
+            // ffmpeg.av_opt_set(pCodecContext->priv_data, "preset", "superfast", 0);
+
             if ((pCodec->capabilities & ffmpeg.AV_CODEC_CAP_TRUNCATED) == ffmpeg.AV_CODEC_CAP_TRUNCATED)
                 pCodecContext->flags |= ffmpeg.AV_CODEC_FLAG_TRUNCATED;
 
@@ -210,17 +216,20 @@ namespace ffmpegplayer.Video.Decode
                             if (pPacket->flags == ffmpeg.AV_PKT_FLAG_CORRUPT)
                                 continue;
 
-                            ffmpeg.av_packet_unref(pPacket);
-
                             if (ffmpeg.avcodec_receive_frame(pCodecContext, pFrame) == 0)
                             {
                                 // convert frame YUV->RGB
                                 ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
                                                     pCodecContext->height, dstData, dstLinesize);
 
+                                framerate = (float)pStream->r_frame_rate.num / (float)pStream->r_frame_rate.den;
+                                bitrate = 0;
+
                                 // callback
                                 if (Callback != null)
                                     Callback((int)width, (int)height, convertedFrameBufferPtr, dstLinesize[0]);
+
+                                ffmpeg.av_packet_unref(pPacket);
                             }
                         }
                     }
@@ -238,6 +247,11 @@ namespace ffmpegplayer.Video.Decode
 
             ffmpeg.avcodec_free_context(&pCodecContext);
             ffmpeg.avformat_close_input(&pFc);
+
+            width = 0;
+            height = 0;
+            framerate = 0;
+            bitrate = 0;
             #endregion
         }
 

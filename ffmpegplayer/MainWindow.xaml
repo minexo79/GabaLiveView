@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
-        xmlns:local="clr-namespace:ffmpegplayer"
-        mc:Ignorable="d"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
+        xmlns:local="clr-namespace:ffmpegplayer"
+        mc:Ignorable="d"
         Title="FFmpeg RTSP Player" Height="720" Width="1280">
     <Window.Resources>
         <Style x:Key="txtBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
@@ -20,14 +20,16 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <views:SKElement Grid.Row="0" x:Name="canvas" PaintSurface="canvas_PaintSurface" />
-        <ui:SimpleStackPanel Orientation="Horizontal" Grid.Row="1">
-            <TextBox x:Name="rtspInput" Text="{Binding RtspUrl, Mode=OneWay}" Width="320" Style="{StaticResource txtBoxStyle}" />
+        <ui:SimpleStackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center">
+            <TextBox x:Name="rtspInput" Text="{Binding RtspUrl, Mode=TwoWay}" Width="320" Style="{StaticResource txtBoxStyle}" />
             <Button x:Name="btnOpen" Content="Open" IsEnabled="{Binding IsButtonOpenEnabled}" Command="{Binding ButtonOpenCommand}" Style="{StaticResource btnStyle}" />
             <Button x:Name="btnStop" Content="Stop" IsEnabled="{Binding IsButtonStopEnabled}" Command="{Binding ButtonStopCommand}" Style="{StaticResource btnStyle}" />
         </ui:SimpleStackPanel>
+        <views:SKElement Grid.Row="1" x:Name="canvas" PaintSurface="canvas_PaintSurface" />
+        <local:VideoInfomation Grid.Row="2" x:Name="videoInfoControl" />
     </Grid>
 </Window>

@@ -9,6 +9,7 @@ namespace ffmpegplayer
     /// </summary>
     public partial class App : Application
     {
+
     }
 
 }
