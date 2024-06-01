@@ -22,14 +22,24 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ui:SimpleStackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center">
-            <TextBox x:Name="rtspInput" Text="{Binding RtspUrl, Mode=TwoWay}" Width="320" Style="{StaticResource txtBoxStyle}" />
-            <Button x:Name="btnOpen" Content="Open" IsEnabled="{Binding IsButtonOpenEnabled}" Command="{Binding ButtonOpenCommand}" Style="{StaticResource btnStyle}" />
-            <Button x:Name="btnStop" Content="Stop" IsEnabled="{Binding IsButtonStopEnabled}" Command="{Binding ButtonStopCommand}" Style="{StaticResource btnStyle}" />
+        <ui:SimpleStackPanel Grid.Row="0" 
+                             Orientation="Horizontal">
+            <Menu x:Name="menu" Style="{StaticResource DefaultMenuStyle}">
+                <MenuItem Header="Help">
+                    <MenuItem Header="About" Command="{Binding MenuAboutCommand}" Style="{StaticResource DefaultMenuItemStyle}" />
+                </MenuItem>
+            </Menu>
+            <TextBox x:Name="rtspInput" 
+                     Text="{Binding RtspUrl, Mode=TwoWay}" Width="320" Style="{StaticResource txtBoxStyle}" />
+            <Button x:Name="btnOpen" Content="Open" 
+                    IsEnabled="{Binding IsButtonOpenEnabled}" Command="{Binding ButtonOpenCommand}" Style="{StaticResource btnStyle}" />
+            <Button x:Name="btnStop" Content="Stop" 
+                    IsEnabled="{Binding IsButtonStopEnabled}" Command="{Binding ButtonStopCommand}" Style="{StaticResource btnStyle}" />
+            <local:VideoInfomation x:Name="videoInfoControl" VerticalAlignment="Center" />
         </ui:SimpleStackPanel>
-        <views:SKElement Grid.Row="1" x:Name="canvas" PaintSurface="canvas_PaintSurface" />
-        <local:VideoInfomation Grid.Row="2" x:Name="videoInfoControl" />
+        <views:SKElement Grid.Row="1" 
+                         x:Name="canvas" 
+                         PaintSurface="canvas_PaintSurface" />
     </Grid>
 </Window>

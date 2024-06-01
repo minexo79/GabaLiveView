@@ -6,12 +6,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using FFmpeg.AutoGen;
+using ffmpegplayer.Video.Utilities;
 using SkiaSharp;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace ffmpegplayer.Video.Decode
 {
-    internal unsafe class FFmpegReceive
+    internal unsafe class FFmpegHelp
     {
         // ffmpeg
         int errCode = 0;
@@ -31,7 +32,7 @@ namespace ffmpegplayer.Video.Decode
         internal float width = 0;
         internal float height = 0;
         internal float framerate = 0;
-        internal float bitrate = 0;
+        internal string codecName = "";
 
         // rtsp url
         string RtspUrl;
@@ -43,7 +44,7 @@ namespace ffmpegplayer.Video.Decode
         // while loop
         bool CanRun;
 
-        public FFmpegReceive(string _url, ReceiveCallback _callback)
+        public FFmpegHelp(string _url, ReceiveCallback _callback)
         {
             RtspUrl = _url;
             Callback = _callback;
@@ -71,7 +72,7 @@ namespace ffmpegplayer.Video.Decode
         void Register()
         {
             // find ffmpeg binaries
-            FFmpegBinary.RegisterFFmpegBinaries();
+            FFmpegBinaryHelp.RegisterFFmpegBinaries();
 
             // ffmpeg init & Register
             ffmpeg.avformat_network_init();
@@ -183,7 +184,6 @@ namespace ffmpegplayer.Video.Decode
             AVFormatContext * pFcPtr = pFc;
             AVCodecParameters _pCodecParams = pCodecParams;
 
-
             // find decoder using codec id
             AVCodec* pCodec = ffmpeg.avcodec_find_decoder(codec_id);
             if (pCodec == null)
@@ -191,6 +191,9 @@ namespace ffmpegplayer.Video.Decode
                 Console.WriteLine("==> Codec not found!!");
                 return;
             }
+
+            codecName = UnsafeUtilities.PtrToStringUTF8(pCodec->name);
+            framerate = pStream->r_frame_rate.num / (float)pStream->r_frame_rate.den;
 
             // allocate codec context
             AVCodecContext* pCodecContext = ffmpeg.avcodec_alloc_context3(pCodec);
@@ -223,7 +226,7 @@ namespace ffmpegplayer.Video.Decode
                 ffmpeg.av_frame_unref(pFrame);
                 ffmpeg.av_packet_unref(pPacket);
 
-                if (ffmpeg.av_read_frame(pFcPtr, pPacket) == 0)
+                if (ffmpeg.av_read_frame(pFcPtr, pPacket) != ffmpeg.AVERROR_EOF)
                 {
                     if (pPacket->stream_index == videoStreamIndex)
                     {
@@ -235,12 +238,10 @@ namespace ffmpegplayer.Video.Decode
 
                             if (ffmpeg.avcodec_receive_frame(pCodecContext, pFrame) == 0)
                             {
+
                                 // convert frame YUV->RGB
                                 ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
                                                     pCodecContext->height, dstData, dstLinesize);
-
-                                framerate = (float)pStream->r_frame_rate.num / (float)pStream->r_frame_rate.den;
-                                bitrate = 0;
 
                                 // callback
                                 if (Callback != null)
@@ -255,9 +256,11 @@ namespace ffmpegplayer.Video.Decode
 
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
+
+            Release();
         }
 
-        internal void Release()
+        void Release()
         {
             AVFormatContext* pFcPtr = pFc;
             AVCodecContext* pCodecContextPtr = pCodecContext;
@@ -271,16 +274,13 @@ namespace ffmpegplayer.Video.Decode
             width = 0;
             height = 0;
             framerate = 0;
-            bitrate = 0;
+            codecName = "";
         }
 
         internal void Stop()
         {
             CanRun = false;
 
-            Thread.Sleep(1000);
-
-            Release();
         }
     }
 }

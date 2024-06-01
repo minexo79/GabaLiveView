@@ -15,7 +15,7 @@ namespace ffmpegplayer.Video
         public int width { get; set; }
         public int height { get; set; }
         public float framerate { get; set; }
-        public float bitrate { get; set; }
+        public string format { get; set; }
     }
 
     internal class VideoCore
@@ -23,7 +23,7 @@ namespace ffmpegplayer.Video
         public event EventHandler<VideoReceiveArgs> OnVideoReceived;
 
         string RtspUrl;
-        FFmpegReceive ffmpegReceive;
+        FFmpegHelp ffmpegReceive;
         static object lockObj = new object();
 
         CancellationTokenSource cts;
@@ -82,7 +82,7 @@ namespace ffmpegplayer.Video
 
         void startFFmpeg()
         {
-            ffmpegReceive = new FFmpegReceive(RtspUrl, onFrameCallback);
+            ffmpegReceive = new FFmpegHelp(RtspUrl, onFrameCallback);
             ffmpegReceive.Init();
             ffmpegReceive.GetEncode();
             ffmpegReceive.Decode();
@@ -131,7 +131,7 @@ namespace ffmpegplayer.Video
                                 videoReceiveArgs.width = (int)ffmpegReceive.width;
                                 videoReceiveArgs.height = (int)ffmpegReceive.height;
                                 videoReceiveArgs.framerate = ffmpegReceive.framerate;
-                                videoReceiveArgs.bitrate = ffmpegReceive.bitrate;
+                                videoReceiveArgs.format = ffmpegReceive.codecName;
 
                                 if (OnVideoReceived != null)
                                     OnVideoReceived(this, videoReceiveArgs);
