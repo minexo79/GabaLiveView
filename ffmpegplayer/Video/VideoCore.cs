@@ -76,14 +76,16 @@ namespace ffmpegplayer.Video
                 connectLostTimer.AutoReset = true;
             }
 
-            connectLostTimer.Start();
+            // connectLostTimer.Start();
             lastFrameDateTime = DateTime.Now;
         }
 
         void startFFmpeg()
         {
             ffmpegReceive = new FFmpegReceive(RtspUrl, onFrameCallback);
-            ffmpegReceive.Start();
+            ffmpegReceive.Init();
+            ffmpegReceive.GetEncode();
+            ffmpegReceive.Decode();
 
             return;
         }

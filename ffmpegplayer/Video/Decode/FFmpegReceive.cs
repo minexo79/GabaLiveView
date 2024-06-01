@@ -7,15 +7,26 @@ using System.Text;
 using System.Threading.Tasks;
 using FFmpeg.AutoGen;
 using SkiaSharp;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace ffmpegplayer.Video.Decode
 {
     internal unsafe class FFmpegReceive
     {
         // ffmpeg
-        int videoStreamIndex        = -1;
-        AVPixelFormat srcPixfmt     = AVPixelFormat.AV_PIX_FMT_NONE;
-        AVPixelFormat dstPixfmt     = AVPixelFormat.AV_PIX_FMT_NONE;
+        int errCode = 0;
+        int videoStreamIndex = -1;
+        AVStream* pStream;
+        AVFormatContext * pFc;
+        AVCodecID codec_id;
+        AVCodecParameters pCodecParams;
+        AVCodecContext* pCodecContext;
+        SwsContext* pConvertContext;
+        AVPixelFormat srcPixfmt = AVPixelFormat.AV_PIX_FMT_NONE;
+        AVPixelFormat dstPixfmt = AVPixelFormat.AV_PIX_FMT_NONE;
+        IntPtr convertedFrameBufferPtr = IntPtr.Zero;
+        byte_ptrArray4 dstData;
+        int_array4 dstLinesize;
 
         internal float width = 0;
         internal float height = 0;
@@ -36,6 +47,8 @@ namespace ffmpegplayer.Video.Decode
         {
             RtspUrl = _url;
             Callback = _callback;
+
+            CanRun = true;
         }
 
         internal void Dispose()
@@ -68,12 +81,8 @@ namespace ffmpegplayer.Video.Decode
             av_log_set_callback_callback callback = new av_log_set_callback_callback(FFmpegLogCallback);
         }
 
-        internal void Start()
+        internal void Init()
         {
-            int errCode = 0;
-            CanRun = true;
-
-            #region init ffmpeg
             Console.WriteLine("==> FFmpeg init");
             Register();
 
@@ -86,10 +95,11 @@ namespace ffmpegplayer.Video.Decode
             ffmpeg.av_dict_set(&options, "flags", "low_delay", 0);          // no delay
             ffmpeg.av_dict_set(&options, "threads", "auto", 0);
 
-            AVFormatContext* pFc = ffmpeg.avformat_alloc_context();
+            pFc = ffmpeg.avformat_alloc_context();
+            AVFormatContext* pFcPtr = pFc;
 
             // open rtsp
-            errCode = ffmpeg.avformat_open_input(&pFc, RtspUrl, null, &options);
+            errCode = ffmpeg.avformat_open_input(&pFcPtr, RtspUrl, null, &options);
             if (errCode < 0)
             {
                 Console.WriteLine("==> Error: " + errCode);
@@ -103,11 +113,13 @@ namespace ffmpegplayer.Video.Decode
                 Console.WriteLine("==> Error: " + errCode);
                 return;
             }
-            #endregion
+        }
 
-            #region encode
+        internal void GetEncode()
+        {
             // find video stream
-            AVStream* pStream = null;
+            //pStream = null;
+
             for (int i = 0; i < pFc->nb_streams; i++)
             {
                 if (pFc->streams[i]->codecpar->codec_type == AVMediaType.AVMEDIA_TYPE_VIDEO)
@@ -125,13 +137,13 @@ namespace ffmpegplayer.Video.Decode
             }
 
             // get context
-            AVCodecParameters pCodecParams = *pStream->codecpar;
+            pCodecParams = *pStream->codecpar;
 
             // get pixel format, width, height
-            width       = pCodecParams.width;
-            height      = pCodecParams.height;
-            srcPixfmt   = (AVPixelFormat)pCodecParams.format;
-            dstPixfmt   = AVPixelFormat.AV_PIX_FMT_RGB0;
+            width = pCodecParams.width;
+            height = pCodecParams.height;
+            srcPixfmt = (AVPixelFormat)pCodecParams.format;
+            dstPixfmt = AVPixelFormat.AV_PIX_FMT_RGB0;
 
             // force to YUV420P
             if (srcPixfmt != AVPixelFormat.AV_PIX_FMT_YUV420P)
@@ -140,13 +152,13 @@ namespace ffmpegplayer.Video.Decode
             }
 
             // find codec_id
-            AVCodecID codec_id = pCodecParams.codec_id;
+            codec_id = pCodecParams.codec_id;
 
             // declare convert context
-            SwsContext* pConvertContext = ffmpeg.sws_getContext((int)width, (int)height, srcPixfmt, 
-                                                        (int)width, (int)height, dstPixfmt, 
+            pConvertContext = ffmpeg.sws_getContext((int)width, (int)height, srcPixfmt,
+                                                        (int)width, (int)height, dstPixfmt,
                                                         ffmpeg.SWS_FAST_BILINEAR, null, null, null);
-        
+
             if (pConvertContext == null)
             {
                 Console.WriteLine("==> Could not initialize the conversion context!!!");
@@ -155,18 +167,23 @@ namespace ffmpegplayer.Video.Decode
 
             // calculate dest buffer size
             int convertedFrameBufferSize = ffmpeg.av_image_get_buffer_size(dstPixfmt, (int)width, (int)height, 1);
-        
+
             // allocate frame Pointer
-            IntPtr convertedFrameBufferPtr = Marshal.AllocHGlobal(convertedFrameBufferSize);
-            var dstData = new byte_ptrArray4();
-            var dstLinesize = new int_array4();
+            convertedFrameBufferPtr = Marshal.AllocHGlobal(convertedFrameBufferSize);
+            dstData = new byte_ptrArray4();
+            dstLinesize = new int_array4();
 
             // set graphic fill
-            ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize, (byte*)convertedFrameBufferPtr.ToPointer(), 
+            ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize, (byte*)convertedFrameBufferPtr.ToPointer(),
                                         dstPixfmt, (int)width, (int)height, 1);
-            #endregion
+        }
 
-            #region decode
+        internal void Decode()
+        {
+            AVFormatContext * pFcPtr = pFc;
+            AVCodecParameters _pCodecParams = pCodecParams;
+
+
             // find decoder using codec id
             AVCodec* pCodec = ffmpeg.avcodec_find_decoder(codec_id);
             if (pCodec == null)
@@ -177,7 +194,8 @@ namespace ffmpegplayer.Video.Decode
 
             // allocate codec context
             AVCodecContext* pCodecContext = ffmpeg.avcodec_alloc_context3(pCodec);
-            errCode = ffmpeg.avcodec_parameters_to_context(pCodecContext, &pCodecParams);
+
+            errCode = ffmpeg.avcodec_parameters_to_context(pCodecContext, &_pCodecParams);
             if (errCode < 0)
             {
                 Console.WriteLine("==> Could not allocate codec context!!");
@@ -200,13 +218,12 @@ namespace ffmpegplayer.Video.Decode
             AVPacket* pPacket = ffmpeg.av_packet_alloc();   // allocate packet
             AVFrame* pFrame = ffmpeg.av_frame_alloc();      // allocate frame
 
-
-            while (CanRun)
+            do
             {
                 ffmpeg.av_frame_unref(pFrame);
                 ffmpeg.av_packet_unref(pPacket);
 
-                if (ffmpeg.av_read_frame(pFc, pPacket) == 0)
+                if (ffmpeg.av_read_frame(pFcPtr, pPacket) == 0)
                 {
                     if (pPacket->stream_index == videoStreamIndex)
                     {
@@ -234,30 +251,36 @@ namespace ffmpegplayer.Video.Decode
                         }
                     }
                 }
-            }
+            } while (CanRun);
 
-            #endregion
+            ffmpeg.av_frame_free(&pFrame);
+            ffmpeg.av_packet_free(&pPacket);
+        }
 
-            #region free resources
+        internal void Release()
+        {
+            AVFormatContext* pFcPtr = pFc;
+            AVCodecContext* pCodecContextPtr = pCodecContext;
+
             Marshal.FreeHGlobal(convertedFrameBufferPtr);
 
             ffmpeg.sws_freeContext(pConvertContext);
-            ffmpeg.av_frame_free(&pFrame);
-            ffmpeg.av_packet_free(&pPacket);
-
-            ffmpeg.avcodec_free_context(&pCodecContext);
-            ffmpeg.avformat_close_input(&pFc);
+            ffmpeg.avcodec_free_context(&pCodecContextPtr);
+            ffmpeg.avformat_close_input(&pFcPtr);
 
             width = 0;
             height = 0;
             framerate = 0;
             bitrate = 0;
-            #endregion
         }
 
         internal void Stop()
         {
             CanRun = false;
+
+            Thread.Sleep(1000);
+
+            Release();
         }
     }
 }
