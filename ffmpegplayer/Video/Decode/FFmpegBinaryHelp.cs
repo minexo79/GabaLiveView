@@ -7,7 +7,7 @@ using FFmpeg.AutoGen;
 
 namespace ffmpegplayer.Video.Decode
 {
-    internal class FFmpegBinary
+    internal class FFmpegBinaryHelp
     {
         internal static void RegisterFFmpegBinaries()
         {

@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ffmpegplayer.Video;
+using System.Windows;
 
 namespace ffmpegplayer
 {
@@ -23,7 +24,7 @@ namespace ffmpegplayer
         private VideoReceiveArgs receiveArgs = null;
 
         [ObservableProperty]
-        private string rtspUrl = "rtsp://localhost:554/mihoyo";
+        private string rtspUrl = "rtsp://localhost:554/zhihan";
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;
@@ -38,7 +39,7 @@ namespace ffmpegplayer
         private string videoFramerate = "";
 
         [ObservableProperty]
-        private string videoBitrate = "";
+        private string videoFormat = "";
 
         Timer infoTimer = new Timer();
 
@@ -54,7 +55,7 @@ namespace ffmpegplayer
             {
                 VideoResolution = ReceiveArgs.width + "x" + ReceiveArgs.height;
                 VideoFramerate = ReceiveArgs.framerate.ToString("0.00") + " Fps";
-                VideoBitrate = ReceiveArgs.bitrate.ToString("0.00") + " kbps";
+                VideoFormat = ReceiveArgs.format;
             }
         }
 
@@ -82,6 +83,13 @@ namespace ffmpegplayer
 
                 infoTimer.Stop();
             }
+        }
+
+        [RelayCommand]
+        public void MenuAbout()
+        {
+            MessageBox.Show("By XOT(minexo79)", "About", 
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void videoCore_OnVideoReceived(object? sender, VideoReceiveArgs e)

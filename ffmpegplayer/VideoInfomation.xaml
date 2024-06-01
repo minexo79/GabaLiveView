@@ -19,7 +19,7 @@
             <Label Name="lblFramerate" Style="{Binding lblStyle}" 
                    Content="{Binding VideoFramerate}" Foreground="White" />
             <Label Name="lblBitrate" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoBitrate}" Foreground="White" />
+                   Content="{Binding VideoFormat}" Foreground="White" />
         </StackPanel>
     </Grid>
 </UserControl>
