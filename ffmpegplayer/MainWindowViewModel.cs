@@ -10,14 +10,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ffmpegplayer.Video;
 using System.Windows;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace ffmpegplayer
 {
     internal partial class MainWindowViewModel : ObservableObject, INotifyPropertyChanged
     {
-
         VideoCore videoCore;
-
         public EventHandler onVideoDrawFrontend;
 
         [ObservableProperty]
@@ -88,8 +88,20 @@ namespace ffmpegplayer
         [RelayCommand]
         public void MenuAbout()
         {
-            MessageBox.Show("By XOT(minexo79)", "About", 
+            string ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            MessageBox.Show($"Version: {ver}\nAuthor: XOT(minexo79)\nMail: minexo79@gmail.com", "About", 
                 MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        public void OpenRepo()
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://github.com/minexo79/ffmpegplayer",
+                UseShellExecute = true
+            });
         }
 
         private void videoCore_OnVideoReceived(object? sender, VideoReceiveArgs e)

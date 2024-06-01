@@ -28,6 +28,7 @@
             <Menu x:Name="menu" Style="{StaticResource DefaultMenuStyle}">
                 <MenuItem Header="Help">
                     <MenuItem Header="About" Command="{Binding MenuAboutCommand}" Style="{StaticResource DefaultMenuItemStyle}" />
+                    <MenuItem Header="Open Github" Command="{Binding OpenRepoCommand}" Style="{StaticResource DefaultMenuItemStyle}" />
                 </MenuItem>
             </Menu>
             <TextBox x:Name="rtspInput" 

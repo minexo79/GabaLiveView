@@ -15,11 +15,11 @@
     <Grid>
         <StackPanel Orientation="Horizontal">
             <Label Name="lblResolution" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoResolution}" Foreground="White" />
+                   Content="{Binding VideoResolution}" Foreground="LightSkyBlue" />
             <Label Name="lblFramerate" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoFramerate}" Foreground="White" />
+                   Content="{Binding VideoFramerate}" Foreground="GreenYellow" />
             <Label Name="lblBitrate" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoFormat}" Foreground="White" />
+                   Content="{Binding VideoFormat}" Foreground="IndianRed" />
         </StackPanel>
     </Grid>
 </UserControl>
