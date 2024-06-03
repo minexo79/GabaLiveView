@@ -40,7 +40,7 @@ namespace ffmpegplayer.Video.Decode
 
                     if ((DateTime.Now - dateTime).Milliseconds >= 16)
                     {
-                        dateTime = DateTime.Now;
+                        dateTime = lastFrameDateTime = DateTime.Now;
                         Render((int)width, (int)height, convertedFrameBufferPtr, dstLinesize[0]);
                     }
 

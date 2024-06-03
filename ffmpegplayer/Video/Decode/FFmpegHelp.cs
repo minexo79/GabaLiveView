@@ -47,6 +47,7 @@ namespace ffmpegplayer.Video.Decode
             streamUrl = _url;
             OnVideoReceived = onVideoReceived;
 
+            lastFrameDateTime = DateTime.Now;
             CanRun = true;
         }
 
@@ -232,7 +233,7 @@ namespace ffmpegplayer.Video.Decode
                 {
                     if (pPacket->stream_index == videoStreamIndex)
                     {
-                        lastFrameDateTime = DateTime.Now;
+                        //lastFrameDateTime = DateTime.Now;
                         Decode(pCodecContext, pPacket, pFrame);
                     }
                 }

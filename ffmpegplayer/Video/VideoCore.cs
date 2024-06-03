@@ -31,7 +31,7 @@ namespace ffmpegplayer.Video
 
         private void connectLostTimerCallback(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            if (DateTime.Now.Subtract(ffmpegHelp.lastFrameDateTime).Seconds > 10)
+            if (DateTime.Now.Subtract(ffmpegHelp.lastFrameDateTime).TotalSeconds > 10)
             {
                 Console.WriteLine("==> Timeout, Restart...");
 
@@ -49,7 +49,7 @@ namespace ffmpegplayer.Video
             if (connectLostTimer == null)
             {
                 connectLostTimer = new Timer();
-                connectLostTimer.Interval = 10000;
+                connectLostTimer.Interval = 1000;
                 connectLostTimer.Elapsed += connectLostTimerCallback;
                 connectLostTimer.AutoReset = true;
             }
