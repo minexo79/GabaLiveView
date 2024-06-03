@@ -40,7 +40,7 @@ namespace ffmpegplayer.Video.Decode
         string streamUrl = "";
 
         // while loop
-        bool CanRun;
+        bool CanRun, isRunning;
 
         public FFmpegHelp(string _url, EventHandler<VideoReceiveArgs> onVideoReceived)
         {
@@ -48,12 +48,14 @@ namespace ffmpegplayer.Video.Decode
             OnVideoReceived = onVideoReceived;
 
             lastFrameDateTime = DateTime.Now;
-            CanRun = true;
+            CanRun = isRunning = true;
         }
 
         internal void Dispose()
         {
             OnVideoReceived = null;
+
+            GC.Collect();
         }
 
         void FFmpegLogCallback(void* ptr, int level, string fmt, byte* vl)
@@ -239,6 +241,8 @@ namespace ffmpegplayer.Video.Decode
                 }
             } while (CanRun);
 
+            Thread.Sleep(100);
+
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
 
@@ -247,6 +251,8 @@ namespace ffmpegplayer.Video.Decode
 
         void Release()
         {
+            Console.WriteLine("==> FFmpeg Release");
+
             AVFormatContext* pFcPtr = pFc;
             AVCodecContext* pCodecContextPtr = pCodecContext;
 
