@@ -8,8 +8,7 @@
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
-    <Version>1.1.1</Version>
-    <StartupObject>ffmpegplayer.App</StartupObject>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
