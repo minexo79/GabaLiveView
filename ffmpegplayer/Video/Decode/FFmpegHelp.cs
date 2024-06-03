@@ -4,16 +4,15 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using FFmpeg.AutoGen;
 using ffmpegplayer.Video.Utilities;
-using SkiaSharp;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace ffmpegplayer.Video.Decode
 {
-    internal unsafe class FFmpegHelp
+    internal unsafe partial class FFmpegHelp
     {
+        event EventHandler<VideoReceiveArgs> OnVideoReceived;
+
         // ffmpeg
         int errCode = 0;
         int videoStreamIndex = -1;
@@ -34,27 +33,26 @@ namespace ffmpegplayer.Video.Decode
         internal float framerate = 0;
         internal string codecName = "";
 
-        // rtsp url
-        string RtspUrl;
+        // last frame time record
+        internal DateTime lastFrameDateTime;
 
-        // delegate
-        internal delegate void ReceiveCallback(int width, int height, IntPtr buffer, int size);
-        private ReceiveCallback Callback;
+        // stream url
+        string streamUrl = "";
 
         // while loop
         bool CanRun;
 
-        public FFmpegHelp(string _url, ReceiveCallback _callback)
+        public FFmpegHelp(string _url, EventHandler<VideoReceiveArgs> onVideoReceived)
         {
-            RtspUrl = _url;
-            Callback = _callback;
+            streamUrl = _url;
+            OnVideoReceived = onVideoReceived;
 
             CanRun = true;
         }
 
         internal void Dispose()
         {
-            Callback = null;
+            OnVideoReceived = null;
         }
 
         void FFmpegLogCallback(void* ptr, int level, string fmt, byte* vl)
@@ -90,7 +88,7 @@ namespace ffmpegplayer.Video.Decode
             // set optimize flag
             AVDictionary* options = null;
             ffmpeg.av_dict_set(&options, "rtsp_transport", "tcp", 0);
-            ffmpeg.av_dict_set(&options, "stimeout", "500000", 0);          // max timeout 1 seconds
+            ffmpeg.av_dict_set(&options, "stimeout", "1000000", 0);         // max timeout 1 seconds
             ffmpeg.av_dict_set(&options, "fflags", "nobuffer", 0);          // no buffer
             ffmpeg.av_dict_set(&options, "fflags", "discardcorrupt", 0);    // discard corrupted frames
             ffmpeg.av_dict_set(&options, "flags", "low_delay", 0);          // no delay
@@ -100,7 +98,7 @@ namespace ffmpegplayer.Video.Decode
             AVFormatContext* pFcPtr = pFc;
 
             // open rtsp
-            errCode = ffmpeg.avformat_open_input(&pFcPtr, RtspUrl, null, &options);
+            errCode = ffmpeg.avformat_open_input(&pFcPtr, streamUrl, null, &options);
             if (errCode < 0)
             {
                 Console.WriteLine("==> Error: " + errCode);
@@ -114,9 +112,11 @@ namespace ffmpegplayer.Video.Decode
                 Console.WriteLine("==> Error: " + errCode);
                 return;
             }
+
+            GetEncode();
         }
 
-        internal void GetEncode()
+        void GetEncode()
         {
             // find video stream
             //pStream = null;
@@ -177,9 +177,11 @@ namespace ffmpegplayer.Video.Decode
             // set graphic fill
             ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize, (byte*)convertedFrameBufferPtr.ToPointer(),
                                         dstPixfmt, (int)width, (int)height, 1);
+
+            Start();
         }
 
-        internal void Decode()
+        void Start()
         {
             AVFormatContext * pFcPtr = pFc;
             AVCodecParameters _pCodecParams = pCodecParams;
@@ -230,26 +232,8 @@ namespace ffmpegplayer.Video.Decode
                 {
                     if (pPacket->stream_index == videoStreamIndex)
                     {
-                        if (ffmpeg.avcodec_send_packet(pCodecContext, pPacket) == 0)
-                        {
-                            // 如果Packet有破損，則丟棄
-                            if (pPacket->flags == ffmpeg.AV_PKT_FLAG_CORRUPT)
-                                continue;
-
-                            if (ffmpeg.avcodec_receive_frame(pCodecContext, pFrame) == 0)
-                            {
-
-                                // convert frame YUV->RGB
-                                ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
-                                                    pCodecContext->height, dstData, dstLinesize);
-
-                                // callback
-                                if (Callback != null)
-                                    Callback((int)width, (int)height, convertedFrameBufferPtr, dstLinesize[0]);
-
-                                ffmpeg.av_packet_unref(pPacket);
-                            }
-                        }
+                        lastFrameDateTime = DateTime.Now;
+                        Decode(pCodecContext, pPacket, pFrame);
                     }
                 }
             } while (CanRun);
@@ -281,6 +265,7 @@ namespace ffmpegplayer.Video.Decode
         {
             CanRun = false;
 
+            Console.WriteLine("==> FFmpeg stop");
         }
     }
 }

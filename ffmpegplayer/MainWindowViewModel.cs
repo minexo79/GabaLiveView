@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ffmpegplayer.Video;
+using ffmpegplayer.Video.Decode;
 using System.Windows;
 using System.Diagnostics;
 using System.Reflection;
@@ -24,7 +25,7 @@ namespace ffmpegplayer
         private VideoReceiveArgs receiveArgs = null;
 
         [ObservableProperty]
-        private string rtspUrl = "rtsp://localhost:554/zhihan";
+        private string rtspUrl = "rtsp://localhost:554/mihoyo";
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;
