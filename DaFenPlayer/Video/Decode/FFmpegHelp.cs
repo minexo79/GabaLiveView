@@ -9,7 +9,7 @@ using DaFenPlayer.Video.Utilities;
 
 namespace DaFenPlayer.Video.Decode
 {
-    internal unsafe partial class FFmpegHelp
+    internal unsafe partial class FFmpegHelp : IDisposable
     {
         event EventHandler<VideoReceiveArgs> OnVideoReceived;
         event EventHandler<LogArgs> OnLogReceived;
@@ -58,36 +58,28 @@ namespace DaFenPlayer.Video.Decode
             cts = new CancellationTokenSource();
         }
 
-        internal void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
-            OnVideoReceived = null;
-            OnLogReceived = null;
-
-            GC.Collect();
+            if (disposing)
+            {
+                OnVideoReceived = null;
+                OnLogReceived = null;
+            }
         }
 
-        // TODO: Prevent ExecutionEngineException
-        void FFmpegLogCallback(void* ptr, int level, string fmt, byte* vl)
+        public void Dispose()
         {
-            if (level > ffmpeg.av_log_get_level())
-                return;
+            Dispose(true);
 
-            var printPrefix = 1;
-            var printLength = 1024;
-            var printBuffer = stackalloc byte[printLength];
-            ffmpeg.av_log_format_line(ptr, level, fmt, vl, printBuffer, printLength, &printPrefix);
-            var message = Marshal.PtrToStringAnsi((IntPtr)printBuffer) ?? "";
+            GC.SuppressFinalize(this);
+        }
 
-            LogArgs logArgs = new LogArgs()
-            {
-                dateTime = DateTime.Now,
-                logMessage = message
-            };
-
-            Console.Write(DateTime.Now + " " + message);
-
-            if (OnLogReceived != null)
-                OnLogReceived?.Invoke(this, logArgs);
+        internal void StartFFmpeg()
+        {
+            Init();
+            GetEncode();
+            decodeTask = new Task(() => StartDecode(), cts.Token);
+            decodeTask.Start();
         }
 
         void Register()
@@ -108,14 +100,6 @@ namespace DaFenPlayer.Video.Decode
             //ffmpeg.av_log_set_callback(callback);
         }
 
-        internal void StartFFmpeg()
-        {
-            Init();
-            GetEncode();
-            decodeTask = new Task(() => StartDecode(), cts.Token);
-            decodeTask.Start();
-        }
-
         void Init()
         {
             Console.WriteLine("==> FFmpeg init");
@@ -124,7 +108,7 @@ namespace DaFenPlayer.Video.Decode
             // set optimize flag
             AVDictionary* options = null;
             ffmpeg.av_dict_set(&options, "rtsp_transport", "tcp", 0);
-            ffmpeg.av_dict_set(&options, "stimeout", "1000000", 0);         // max timeout 1 seconds
+            ffmpeg.av_dict_set(&options, "stimeout", "2000000", 0);         // max timeout 2 seconds
             ffmpeg.av_dict_set(&options, "fflags", "nobuffer", 0);          // no buffer
             ffmpeg.av_dict_set(&options, "fflags", "discardcorrupt", 0);    // discard corrupted frames
             ffmpeg.av_dict_set(&options, "flags", "low_delay", 0);          // no delay
@@ -212,7 +196,7 @@ namespace DaFenPlayer.Video.Decode
                                         dstPixfmt, (int)width, (int)height, 1);
         }
 
-        int StartDecode()
+        Task StartDecode()
         {
             AVFormatContext * pFcPtr = pFc;
             AVCodecParameters _pCodecParams = pCodecParams;
@@ -222,11 +206,14 @@ namespace DaFenPlayer.Video.Decode
             if (pCodec == null)
             {
                 Console.WriteLine("==> Codec not found!!");
-                return -1;
+                return Task.CompletedTask;
             }
 
             codecName = UnsafeUtilities.PtrToStringUTF8(pCodec->name);
-            framerate = pStream->r_frame_rate.num / (float)pStream->r_frame_rate.den;
+
+            // 2024.6.5 Blackcat: Use av_guess_frame_rate instead r_framerate to get the **real** framerate
+            AVRational avFpsRational = ffmpeg.av_guess_frame_rate(pFc, pStream, null);
+            framerate = avFpsRational.num / (float)avFpsRational.den;
 
             // allocate codec context
             AVCodecContext* pCodecContext = ffmpeg.avcodec_alloc_context3(pCodec);
@@ -235,7 +222,7 @@ namespace DaFenPlayer.Video.Decode
             if (errCode < 0)
             {
                 Console.WriteLine("==> Could not allocate codec context!!");
-                return -1;
+                return Task.CompletedTask;
             }
 
             // ffmpeg.av_opt_set(pCodecContext->priv_data, "preset", "superfast", 0);
@@ -248,7 +235,7 @@ namespace DaFenPlayer.Video.Decode
             if (errCode < 0)
             {
                 Console.WriteLine("==> Could not open codec!!");
-                return -1;
+                return Task.CompletedTask;
             }
 
             AVPacket* pPacket = ffmpeg.av_packet_alloc();   // allocate packet
@@ -262,6 +249,8 @@ namespace DaFenPlayer.Video.Decode
                 //Console.WriteLine("1");
                 if (ffmpeg.av_read_frame(pFcPtr, pPacket) != ffmpeg.AVERROR_EOF)
                 {
+                    // 2024.6.5 Blackcat: Rescale the packet timestamp to the stream timebase
+                    ffmpeg.av_packet_rescale_ts(pPacket, pStream->time_base, pCodecContext->time_base);
                     //Console.WriteLine("2");
                     Decode(pCodecContext, pPacket, pFrame);
                     //Console.WriteLine("3");
@@ -273,7 +262,7 @@ namespace DaFenPlayer.Video.Decode
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
 
-            return 0;
+            return Task.CompletedTask;
         }
 
         void Release()

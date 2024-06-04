@@ -40,8 +40,8 @@ namespace DaFenPlayer
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
-            if (!vm.isDrawing)
-                return;
+            //if (!vm.isDrawing)
+            //    return;
 
             if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
             {

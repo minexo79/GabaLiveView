@@ -18,7 +18,7 @@ namespace DaFenPlayer.Video.Decode
         public string format { get; set; }
     }
 
-    internal unsafe partial class FFmpegHelp
+    internal unsafe partial class FFmpegHelp : IDisposable
     {
         object lockObj = new object();
         bool isBusy = false;

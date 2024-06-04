@@ -82,25 +82,25 @@ namespace DaFenPlayer
 
             infoTimer.Start();
 
-            isDrawing = true;
-        }
-
-        private void VideoCore_OnLogReceived(object? sender, LogArgs e)
-        {
-            LogMessage = e.logMessage ?? "";
+            //isDrawing = true;
         }
 
         [RelayCommand]
         public void ButtonStop()
         {
             IsButtonOpenEnabled = true;
-            isDrawing = false;
+            //isDrawing = false;
 
             if (videoCore != null)
             {
                 videoCore.OnVideoReceived   -= videoCore_OnVideoReceived;
                 videoCore.OnLogReceived     -= VideoCore_OnLogReceived;
                 videoCore.Stop();
+
+
+                // 2024.6.5 Blackcat: Add Blank Frame To Clear The Video
+                ReceiveArgs = null;
+                onVideoDrawFrontend?.Invoke(this, null);
 
                 infoTimer.Stop();
             }
@@ -131,5 +131,11 @@ namespace DaFenPlayer
 
             onVideoDrawFrontend?.Invoke(this, null);
         }
+
+        private void VideoCore_OnLogReceived(object? sender, LogArgs e)
+        {
+            LogMessage = e.logMessage ?? "";
+        }
+
     }
 }

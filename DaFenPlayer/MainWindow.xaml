@@ -8,7 +8,7 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         xmlns:local="clr-namespace:DaFenPlayer"
         mc:Ignorable="d"
-        Title="DaFen Player" Height="720" Width="1280">
+        Title="DaFen Player" Height="720" Width="1080">
     <Window.Resources>
         <Style x:Key="comboxStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
             <Setter Property="Margin" Value="2" />
