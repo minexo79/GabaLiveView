@@ -8,8 +8,12 @@
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
-    <Version>1.1.3</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\app.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Resources\app.ico" />
@@ -24,6 +28,10 @@
 
   <ItemGroup>
     <Folder Include="FFmpeg\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\app.png" />
   </ItemGroup>
 
   <ItemGroup>

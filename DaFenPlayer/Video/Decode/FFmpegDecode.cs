@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 
-namespace ffmpegplayer.Video.Decode
+namespace DaFenPlayer.Video.Decode
 {
     public class VideoReceiveArgs : EventArgs
     {

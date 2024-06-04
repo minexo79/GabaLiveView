@@ -1,4 +1,4 @@
-﻿using ffmpegplayer.Video.Decode;
+﻿using DaFenPlayer.Video.Decode;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Timer = System.Timers.Timer;
 
-namespace ffmpegplayer.Video
+namespace DaFenPlayer.Video
 {
     internal class VideoCore
     {

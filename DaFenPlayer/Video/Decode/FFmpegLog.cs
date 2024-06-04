@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ffmpegplayer.Video.Decode
+namespace DaFenPlayer.Video.Decode
 {
     public class LogArgs : EventArgs
     {

@@ -5,9 +5,9 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using FFmpeg.AutoGen;
-using ffmpegplayer.Video.Utilities;
+using DaFenPlayer.Video.Utilities;
 
-namespace ffmpegplayer.Video.Decode
+namespace DaFenPlayer.Video.Decode
 {
     internal unsafe partial class FFmpegHelp
     {

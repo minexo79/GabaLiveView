@@ -8,24 +8,28 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ffmpegplayer.Video;
-using ffmpegplayer.Video.Decode;
+using DaFenPlayer.Video;
+using DaFenPlayer.Video.Decode;
 using System.Windows;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace ffmpegplayer
+namespace DaFenPlayer
 {
     internal partial class MainWindowViewModel : ObservableObject, INotifyPropertyChanged
     {
         VideoCore videoCore;
         public EventHandler onVideoDrawFrontend;
+        public bool isDrawing = false;
 
         [ObservableProperty]
         private VideoReceiveArgs receiveArgs = null;
 
         [ObservableProperty]
-        private string rtspUrl = "rtsp://localhost:554/twelve-girl";
+        private int streamProtocol = 0;
+
+        [ObservableProperty]
+        private string streamUrl = "localhost:554/genshin";
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;
@@ -68,12 +72,17 @@ namespace ffmpegplayer
         {
             IsButtonOpenEnabled = false;
 
-            videoCore = new VideoCore(RtspUrl);
+            string protocol = (StreamProtocol == 0) ? "rtsp" :
+                              (StreamProtocol == 1) ? "rtmp" : "hls";
+
+            videoCore = new VideoCore(protocol + "://" + StreamUrl);
             videoCore.OnVideoReceived += videoCore_OnVideoReceived;
             videoCore.OnLogReceived += VideoCore_OnLogReceived;
             videoCore.Start();
 
             infoTimer.Start();
+
+            isDrawing = true;
         }
 
         private void VideoCore_OnLogReceived(object? sender, LogArgs e)
@@ -85,11 +94,12 @@ namespace ffmpegplayer
         public void ButtonStop()
         {
             IsButtonOpenEnabled = true;
+            isDrawing = false;
 
             if (videoCore != null)
             {
-                videoCore.OnVideoReceived -= videoCore_OnVideoReceived;
-                videoCore.OnLogReceived -= VideoCore_OnLogReceived;
+                videoCore.OnVideoReceived   -= videoCore_OnVideoReceived;
+                videoCore.OnLogReceived     -= VideoCore_OnLogReceived;
                 videoCore.Stop();
 
                 infoTimer.Stop();

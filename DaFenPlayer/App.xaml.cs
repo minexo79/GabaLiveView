@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace ffmpegplayer
+namespace DaFenPlayer
 {
     /// <summary>
     /// Interaction logic for App.xaml

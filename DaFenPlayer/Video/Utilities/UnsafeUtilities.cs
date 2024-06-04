@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ffmpegplayer.Video.Utilities
+namespace DaFenPlayer.Video.Utilities
 {
     internal unsafe class UnsafeUtilities
     {

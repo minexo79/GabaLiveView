@@ -1,4 +1,4 @@
-﻿using ffmpegplayer.Video;
+﻿using DaFenPlayer.Video;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System.Text;
@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ffmpegplayer
+namespace DaFenPlayer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -40,6 +40,9 @@ namespace ffmpegplayer
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
+            if (!vm.isDrawing)
+                return;
+
             if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
             {
                 e.Surface.Canvas.DrawBitmap(vm.ReceiveArgs.videoBmp, e.Info.Rect);
