@@ -22,9 +22,15 @@ namespace ffmpegplayer.Video.Decode
     {
         DateTime dateTime = DateTime.Now;
         object lockObj = new object();
+        bool isBusy = false;
 
         internal unsafe void Decode(AVCodecContext * pCodecContext, AVPacket * pPacket, AVFrame* pFrame)
         {
+            if (cts.IsCancellationRequested)
+            {
+                return;
+            }
+
             if (ffmpeg.avcodec_send_packet(pCodecContext, pPacket) == 0)
             {
                 // 如果Packet有破損，則丟棄
@@ -33,7 +39,6 @@ namespace ffmpegplayer.Video.Decode
 
                 if (ffmpeg.avcodec_receive_frame(pCodecContext, pFrame) == 0)
                 {
-
                     // convert frame YUV->RGB
                     ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
                                         pCodecContext->height, dstData, dstLinesize);
@@ -51,6 +56,11 @@ namespace ffmpegplayer.Video.Decode
 
         internal unsafe void Render(int width, int height, IntPtr frameBufferPtr, int rowByte)
         {
+            if (cts.IsCancellationRequested)
+            {
+                return;
+            }
+
             try
             {
                 // for thread safe, process one thing at a time
