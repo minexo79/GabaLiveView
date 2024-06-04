@@ -242,10 +242,6 @@ namespace ffmpegplayer.Video.Decode
                 if (ffmpeg.av_read_frame(pFcPtr, pPacket) != ffmpeg.AVERROR_EOF)
                 {
                     //Console.WriteLine("2");
-                    if (cts.IsCancellationRequested)
-                    {
-                        break;
-                    }
                     Decode(pCodecContext, pPacket, pFrame);
                     //Console.WriteLine("3");
                 }

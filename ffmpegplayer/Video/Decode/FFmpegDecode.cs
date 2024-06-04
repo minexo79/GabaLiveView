@@ -31,17 +31,21 @@ namespace ffmpegplayer.Video.Decode
                 return;
             }
 
+            // Console.WriteLine("1");
             if (ffmpeg.avcodec_send_packet(pCodecContext, pPacket) == 0)
             {
+                // Console.WriteLine("2");
                 // 如果Packet有破損，則丟棄
                 if (pPacket->flags == ffmpeg.AV_PKT_FLAG_CORRUPT)
                     return;
 
                 if (ffmpeg.avcodec_receive_frame(pCodecContext, pFrame) == 0)
                 {
+                    // Console.WriteLine("3");
                     // convert frame YUV->RGB
                     ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
                                         pCodecContext->height, dstData, dstLinesize);
+                    // Console.WriteLine("4");
 
                     if ((DateTime.Now - dateTime).Milliseconds >= 16)
                     {
@@ -49,7 +53,7 @@ namespace ffmpegplayer.Video.Decode
                         Render((int)width, (int)height, convertedFrameBufferPtr, dstLinesize[0]);
                     }
 
-                    ffmpeg.av_packet_unref(pPacket);
+                    // ffmpeg.av_packet_unref(pPacket);
                 }
             }
         }
