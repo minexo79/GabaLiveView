@@ -20,13 +20,17 @@ namespace ffmpegplayer.Video.Decode
 
     internal unsafe partial class FFmpegHelp
     {
-        DateTime dateTime = DateTime.Now;
         object lockObj = new object();
         bool isBusy = false;
 
         internal unsafe void Decode(AVCodecContext * pCodecContext, AVPacket * pPacket, AVFrame* pFrame)
         {
             if (cts.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (pPacket->stream_index != videoStreamIndex)
             {
                 return;
             }
@@ -45,15 +49,12 @@ namespace ffmpegplayer.Video.Decode
                     // convert frame YUV->RGB
                     ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
                                         pCodecContext->height, dstData, dstLinesize);
+
                     // Console.WriteLine("4");
+                    lastFrameDateTime = DateTime.Now;
+                    Render((int)width, (int)height, convertedFrameBufferPtr, dstLinesize[0]);
 
-                    if ((DateTime.Now - dateTime).Milliseconds >= 16)
-                    {
-                        dateTime = lastFrameDateTime = DateTime.Now;
-                        Render((int)width, (int)height, convertedFrameBufferPtr, dstLinesize[0]);
-                    }
-
-                    // ffmpeg.av_packet_unref(pPacket);
+                    ffmpeg.av_packet_unref(pPacket);
                 }
             }
         }

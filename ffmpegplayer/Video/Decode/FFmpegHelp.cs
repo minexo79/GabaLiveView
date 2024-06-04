@@ -12,6 +12,7 @@ namespace ffmpegplayer.Video.Decode
     internal unsafe partial class FFmpegHelp
     {
         event EventHandler<VideoReceiveArgs> OnVideoReceived;
+        event EventHandler<LogArgs> OnLogReceived;
 
         // ffmpeg
         int errCode = 0;
@@ -39,39 +40,54 @@ namespace ffmpegplayer.Video.Decode
         // stream url
         string streamUrl = "";
 
-        // while loop
-        bool CanRun, isRunning;
+        // log lock
+        object logLock = new object();
 
         // task
         Task decodeTask;
         CancellationTokenSource cts;
 
-        public FFmpegHelp(string _url, EventHandler<VideoReceiveArgs> onVideoReceived)
+        public FFmpegHelp(string _url, EventHandler<VideoReceiveArgs> onVideoReceived, EventHandler<LogArgs> onLogReceived)
         {
             streamUrl = _url;
+
             OnVideoReceived = onVideoReceived;
+            OnLogReceived = onLogReceived;
+
             lastFrameDateTime = DateTime.Now;
-            isRunning = true;
             cts = new CancellationTokenSource();
         }
 
         internal void Dispose()
         {
             OnVideoReceived = null;
+            OnLogReceived = null;
 
             GC.Collect();
         }
 
+        // TODO: Prevent ExecutionEngineException
         void FFmpegLogCallback(void* ptr, int level, string fmt, byte* vl)
         {
-            // get log
-            byte[] bytes = new byte[1024];
-            fixed (byte* p = bytes)
+            if (level > ffmpeg.av_log_get_level())
+                return;
+
+            var printPrefix = 1;
+            var printLength = 1024;
+            var printBuffer = stackalloc byte[printLength];
+            ffmpeg.av_log_format_line(ptr, level, fmt, vl, printBuffer, printLength, &printPrefix);
+            var message = Marshal.PtrToStringAnsi((IntPtr)printBuffer) ?? "";
+
+            LogArgs logArgs = new LogArgs()
             {
-                ffmpeg.av_log_format_line(ptr, level, fmt, vl, p, bytes.Length, null);
-                string message = Encoding.UTF8.GetString(bytes);
-                Console.WriteLine("==> " + message);
-            }
+                dateTime = DateTime.Now,
+                logMessage = message
+            };
+
+            Console.Write(DateTime.Now + " " + message);
+
+            if (OnLogReceived != null)
+                OnLogReceived?.Invoke(this, logArgs);
         }
 
         void Register()
@@ -84,7 +100,12 @@ namespace ffmpegplayer.Video.Decode
 
             // set log 
             ffmpeg.av_log_set_level(ffmpeg.AV_LOG_ERROR);
-            av_log_set_callback_callback callback = new av_log_set_callback_callback(FFmpegLogCallback);
+
+            // TODO: Prevent ExecutionEngineException
+            //av_log_set_callback_callback callback = 
+            //    (void* ptr, int level, string fmt, byte* vl) => FFmpegLogCallback(ptr, level, fmt, vl);
+
+            //ffmpeg.av_log_set_callback(callback);
         }
 
         internal void StartFFmpeg()
@@ -246,7 +267,7 @@ namespace ffmpegplayer.Video.Decode
                     //Console.WriteLine("3");
                 }
 
-            } while (!cts.IsCancellationRequested);
+            } while (!cts.Token.IsCancellationRequested);
 
 
             ffmpeg.av_frame_free(&pFrame);
@@ -276,8 +297,6 @@ namespace ffmpegplayer.Video.Decode
 
         internal void StopFFmpeg()
         {
-            // CanRun = false;
-
             cts.Cancel();
             decodeTask.Wait();
 

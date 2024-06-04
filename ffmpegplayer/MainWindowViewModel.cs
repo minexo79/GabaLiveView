@@ -25,7 +25,7 @@ namespace ffmpegplayer
         private VideoReceiveArgs receiveArgs = null;
 
         [ObservableProperty]
-        private string rtspUrl = "rtsp://192.168.144.108:554/eo";
+        private string rtspUrl = "rtsp://localhost:554/twelve-girl";
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;
@@ -41,6 +41,9 @@ namespace ffmpegplayer
 
         [ObservableProperty]
         private string videoFormat = "";
+
+        [ObservableProperty]
+        private string logMessage = "";
 
         Timer infoTimer = new Timer();
 
@@ -67,9 +70,15 @@ namespace ffmpegplayer
 
             videoCore = new VideoCore(RtspUrl);
             videoCore.OnVideoReceived += videoCore_OnVideoReceived;
+            videoCore.OnLogReceived += VideoCore_OnLogReceived;
             videoCore.Start();
 
             infoTimer.Start();
+        }
+
+        private void VideoCore_OnLogReceived(object? sender, LogArgs e)
+        {
+            LogMessage = e.logMessage ?? "";
         }
 
         [RelayCommand]
@@ -80,6 +89,7 @@ namespace ffmpegplayer
             if (videoCore != null)
             {
                 videoCore.OnVideoReceived -= videoCore_OnVideoReceived;
+                videoCore.OnLogReceived -= VideoCore_OnLogReceived;
                 videoCore.Stop();
 
                 infoTimer.Stop();

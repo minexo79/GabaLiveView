@@ -12,6 +12,7 @@ namespace ffmpegplayer.Video
     internal class VideoCore
     {
         public event EventHandler<VideoReceiveArgs> OnVideoReceived;
+        public event EventHandler<LogArgs> OnLogReceived;
 
         string streamUrl;
         FFmpegHelp ffmpegHelp;
@@ -42,7 +43,7 @@ namespace ffmpegplayer.Video
 
         public void Start()
         {
-            ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived);
+            ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived, OnLogReceived);
             startPlay = new Task(() => ffmpegHelp.StartFFmpeg());
             startPlay.Start();
 
@@ -58,13 +59,13 @@ namespace ffmpegplayer.Video
             connectLostTimer.Start();
         }
 
-        void startFFmpeg()
-        {
-            ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived);
-            ffmpegHelp.StartFFmpeg();
+        //void startFFmpeg()
+        //{
+        //    ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived);
+        //    ffmpegHelp.StartFFmpeg();
 
-            return;
-        }
+        //    return;
+        //}
 
         public void Stop()
         {
@@ -74,6 +75,7 @@ namespace ffmpegplayer.Video
 
                 ffmpegHelp.StopFFmpeg();
                 ffmpegHelp.Dispose();
+                ffmpegHelp = null;
 
                 startPlay.Wait(100);
             }

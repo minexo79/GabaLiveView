@@ -17,11 +17,15 @@
         <Style x:Key="btnStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
             <Setter Property="Margin" Value="2" />
         </Style>
+        <Style x:Key="lblStyle" TargetType="Label" BasedOn="{StaticResource DefaultLabelStyle}">
+            <Setter Property="Margin" Value="2" />
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <ui:SimpleStackPanel Grid.Row="0" 
                              Orientation="Horizontal">
@@ -42,5 +46,10 @@
         <views:SKElement Grid.Row="1" 
                          x:Name="canvas" 
                          PaintSurface="canvas_PaintSurface" />
+        <!--<ui:SimpleStackPanel Grid.Row="2" 
+                             Orientation="Horizontal">
+            <Label Name="lblLog" Style="{Binding lblStyle}"
+                   Content="{Binding LogMessage}" Foreground="White" />
+        </ui:SimpleStackPanel>-->
     </Grid>
 </Window>
