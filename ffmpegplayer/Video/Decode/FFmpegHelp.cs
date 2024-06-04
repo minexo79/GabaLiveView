@@ -42,13 +42,17 @@ namespace ffmpegplayer.Video.Decode
         // while loop
         bool CanRun, isRunning;
 
+        // task
+        Task decodeTask;
+        CancellationTokenSource cts;
+
         public FFmpegHelp(string _url, EventHandler<VideoReceiveArgs> onVideoReceived)
         {
             streamUrl = _url;
             OnVideoReceived = onVideoReceived;
-
             lastFrameDateTime = DateTime.Now;
-            CanRun = isRunning = true;
+            isRunning = true;
+            cts = new CancellationTokenSource();
         }
 
         internal void Dispose()
@@ -83,7 +87,15 @@ namespace ffmpegplayer.Video.Decode
             av_log_set_callback_callback callback = new av_log_set_callback_callback(FFmpegLogCallback);
         }
 
-        internal void Init()
+        internal void StartFFmpeg()
+        {
+            Init();
+            GetEncode();
+            decodeTask = new Task(() => StartDecode(), cts.Token);
+            decodeTask.Start();
+        }
+
+        void Init()
         {
             Console.WriteLine("==> FFmpeg init");
             Register();
@@ -115,10 +127,7 @@ namespace ffmpegplayer.Video.Decode
                 Console.WriteLine("==> Error: " + errCode);
                 return;
             }
-
-            GetEncode();
         }
-
         void GetEncode()
         {
             // find video stream
@@ -180,11 +189,9 @@ namespace ffmpegplayer.Video.Decode
             // set graphic fill
             ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize, (byte*)convertedFrameBufferPtr.ToPointer(),
                                         dstPixfmt, (int)width, (int)height, 1);
-
-            Start();
         }
 
-        void Start()
+        int StartDecode()
         {
             AVFormatContext * pFcPtr = pFc;
             AVCodecParameters _pCodecParams = pCodecParams;
@@ -194,7 +201,7 @@ namespace ffmpegplayer.Video.Decode
             if (pCodec == null)
             {
                 Console.WriteLine("==> Codec not found!!");
-                return;
+                return -1;
             }
 
             codecName = UnsafeUtilities.PtrToStringUTF8(pCodec->name);
@@ -207,7 +214,7 @@ namespace ffmpegplayer.Video.Decode
             if (errCode < 0)
             {
                 Console.WriteLine("==> Could not allocate codec context!!");
-                return;
+                return -1;
             }
 
             // ffmpeg.av_opt_set(pCodecContext->priv_data, "preset", "superfast", 0);
@@ -220,7 +227,7 @@ namespace ffmpegplayer.Video.Decode
             if (errCode < 0)
             {
                 Console.WriteLine("==> Could not open codec!!");
-                return;
+                return -1;
             }
 
             AVPacket* pPacket = ffmpeg.av_packet_alloc();   // allocate packet
@@ -231,27 +238,30 @@ namespace ffmpegplayer.Video.Decode
                 ffmpeg.av_frame_unref(pFrame);
                 ffmpeg.av_packet_unref(pPacket);
 
+                //Console.WriteLine("1");
                 if (ffmpeg.av_read_frame(pFcPtr, pPacket) != ffmpeg.AVERROR_EOF)
                 {
-                    if (pPacket->stream_index == videoStreamIndex)
+                    //Console.WriteLine("2");
+                    if (cts.IsCancellationRequested)
                     {
-                        //lastFrameDateTime = DateTime.Now;
-                        Decode(pCodecContext, pPacket, pFrame);
+                        break;
                     }
+                    Decode(pCodecContext, pPacket, pFrame);
+                    //Console.WriteLine("3");
                 }
-            } while (CanRun);
 
-            Thread.Sleep(100);
+            } while (!cts.IsCancellationRequested);
+
 
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
 
-            Release();
+            return 0;
         }
 
         void Release()
         {
-            Console.WriteLine("==> FFmpeg Release");
+            Console.WriteLine("==> FFmpeg Stop");
 
             AVFormatContext* pFcPtr = pFc;
             AVCodecContext* pCodecContextPtr = pCodecContext;
@@ -268,11 +278,14 @@ namespace ffmpegplayer.Video.Decode
             codecName = "";
         }
 
-        internal void Stop()
+        internal void StopFFmpeg()
         {
-            CanRun = false;
+            // CanRun = false;
 
-            Console.WriteLine("==> FFmpeg stop");
+            cts.Cancel();
+            decodeTask.Wait();
+
+            Release();
         }
     }
 }

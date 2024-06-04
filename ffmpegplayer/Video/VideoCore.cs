@@ -42,7 +42,8 @@ namespace ffmpegplayer.Video
 
         public void Start()
         {
-            startPlay = new Task(() => startFFmpeg());
+            ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived);
+            startPlay = new Task(() => ffmpegHelp.StartFFmpeg());
             startPlay.Start();
 
 
@@ -60,7 +61,7 @@ namespace ffmpegplayer.Video
         void startFFmpeg()
         {
             ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived);
-            ffmpegHelp.Init();
+            ffmpegHelp.StartFFmpeg();
 
             return;
         }
@@ -71,7 +72,7 @@ namespace ffmpegplayer.Video
             {
                 connectLostTimer.Stop();
 
-                ffmpegHelp.Stop();
+                ffmpegHelp.StopFFmpeg();
                 ffmpegHelp.Dispose();
 
                 startPlay.Wait(100);

@@ -25,7 +25,7 @@ namespace ffmpegplayer
         private VideoReceiveArgs receiveArgs = null;
 
         [ObservableProperty]
-        private string rtspUrl = "rtsp://localhost:554/mihoyo";
+        private string rtspUrl = "rtsp://192.168.144.108:554/eo";
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;

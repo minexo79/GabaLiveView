@@ -22,6 +22,7 @@ namespace ffmpegplayer.Video.Decode
     {
         DateTime dateTime = DateTime.Now;
         object lockObj = new object();
+        bool isBusy = false;
 
         internal unsafe void Decode(AVCodecContext * pCodecContext, AVPacket * pPacket, AVFrame* pFrame)
         {
@@ -33,7 +34,6 @@ namespace ffmpegplayer.Video.Decode
 
                 if (ffmpeg.avcodec_receive_frame(pCodecContext, pFrame) == 0)
                 {
-
                     // convert frame YUV->RGB
                     ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
                                         pCodecContext->height, dstData, dstLinesize);
