@@ -62,8 +62,8 @@ namespace DaFenPlayer
             if (ReceiveArgs != null)
             {
                 VideoResolution = ReceiveArgs.width + "x" + ReceiveArgs.height;
-                VideoFramerate = ReceiveArgs.framerate.ToString("0.00") + " Fps";
-                VideoFormat = ReceiveArgs.format;
+                VideoFramerate  = ReceiveArgs.framerate.ToString("0.00") + " Fps";
+                VideoFormat     = ReceiveArgs.format;
             }
         }
 
@@ -75,14 +75,15 @@ namespace DaFenPlayer
             string protocol = (StreamProtocol == 0) ? "rtsp" :
                               (StreamProtocol == 1) ? "rtmp" : "hls";
 
-            videoCore = new VideoCore(protocol + "://" + StreamUrl);
-            videoCore.OnVideoReceived += videoCore_OnVideoReceived;
-            videoCore.OnLogReceived += VideoCore_OnLogReceived;
+            if (videoCore == null)
+            {
+                videoCore = new VideoCore(protocol + "://" + StreamUrl);
+                videoCore.OnVideoReceived   += videoCore_OnVideoReceived;
+                videoCore.OnLogReceived     += VideoCore_OnLogReceived;
+            }
+
             videoCore.Start();
-
             infoTimer.Start();
-
-            //isDrawing = true;
         }
 
         [RelayCommand]
@@ -93,10 +94,7 @@ namespace DaFenPlayer
 
             if (videoCore != null)
             {
-                videoCore.OnVideoReceived   -= videoCore_OnVideoReceived;
-                videoCore.OnLogReceived     -= VideoCore_OnLogReceived;
                 videoCore.Stop();
-
 
                 // 2024.6.5 Blackcat: Add Blank Frame To Clear The Video
                 ReceiveArgs = null;

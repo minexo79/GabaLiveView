@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using SkiaSharp;
 using FFmpeg.AutoGen;
 using DaFenPlayer.Video.Utilities;
 
@@ -34,6 +35,12 @@ namespace DaFenPlayer.Video.Decode
         internal float framerate = 0;
         internal string codecName = "";
 
+        internal bool isOpen = false;
+
+        // SKBitmap
+        SKBitmap videoBmp;
+        SKImageInfo imageInfo;
+
         // last frame time record
         internal DateTime lastFrameDateTime;
 
@@ -63,7 +70,15 @@ namespace DaFenPlayer.Video.Decode
             if (disposing)
             {
                 OnVideoReceived = null;
-                OnLogReceived = null;
+                OnLogReceived   = null;
+
+                videoBmp?.Dispose();
+                videoBmp = null;
+
+                cts?.Dispose();
+                cts = null;
+
+                logLock = null;
             }
         }
 
@@ -71,6 +86,7 @@ namespace DaFenPlayer.Video.Decode
         {
             Dispose(true);
 
+            GC.Collect();
             GC.SuppressFinalize(this);
         }
 
@@ -125,6 +141,9 @@ namespace DaFenPlayer.Video.Decode
                 return;
             }
 
+            isOpen = true;
+
+
             // find stream info
             errCode = ffmpeg.avformat_find_stream_info(pFc, null);
             if (errCode < 0)
@@ -162,6 +181,11 @@ namespace DaFenPlayer.Video.Decode
             height = pCodecParams.height;
             srcPixfmt = (AVPixelFormat)pCodecParams.format;
             dstPixfmt = AVPixelFormat.AV_PIX_FMT_RGB0;
+
+            // new SKBitmap
+            videoBmp = new SKBitmap((int)width, (int)height);
+            imageInfo = new SKImageInfo((int)width, (int)height, SKColorType.Bgra8888, SKAlphaType.Premul);
+
 
             // force to YUV420P
             if (srcPixfmt != AVPixelFormat.AV_PIX_FMT_YUV420P)
@@ -211,10 +235,6 @@ namespace DaFenPlayer.Video.Decode
 
             codecName = UnsafeUtilities.PtrToStringUTF8(pCodec->name);
 
-            // 2024.6.5 Blackcat: Use av_guess_frame_rate instead r_framerate to get the **real** framerate
-            AVRational avFpsRational = ffmpeg.av_guess_frame_rate(pFc, pStream, null);
-            framerate = avFpsRational.num / (float)avFpsRational.den;
-
             // allocate codec context
             AVCodecContext* pCodecContext = ffmpeg.avcodec_alloc_context3(pCodec);
 
@@ -249,15 +269,17 @@ namespace DaFenPlayer.Video.Decode
                 //Console.WriteLine("1");
                 if (ffmpeg.av_read_frame(pFcPtr, pPacket) != ffmpeg.AVERROR_EOF)
                 {
+                    // 2024.6.5 Blackcat: Use av_guess_frame_rate instead r_framerate to get the **real** framerate
+                    AVRational avFpsRational = ffmpeg.av_guess_frame_rate(pFc, pStream, null);
+                    framerate = avFpsRational.num / (float)avFpsRational.den;
                     // 2024.6.5 Blackcat: Rescale the packet timestamp to the stream timebase
                     ffmpeg.av_packet_rescale_ts(pPacket, pStream->time_base, pCodecContext->time_base);
                     //Console.WriteLine("2");
                     Decode(pCodecContext, pPacket, pFrame);
                     //Console.WriteLine("3");
                 }
-
-            } while (!cts.Token.IsCancellationRequested);
-
+            } 
+            while (!cts.Token.IsCancellationRequested);
 
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
@@ -273,10 +295,13 @@ namespace DaFenPlayer.Video.Decode
             AVCodecContext* pCodecContextPtr = pCodecContext;
 
             Marshal.FreeHGlobal(convertedFrameBufferPtr);
-
             ffmpeg.sws_freeContext(pConvertContext);
             ffmpeg.avcodec_free_context(&pCodecContextPtr);
-            ffmpeg.avformat_close_input(&pFcPtr);
+
+            if (isOpen)
+                ffmpeg.avformat_close_input(&pFcPtr);
+
+            ffmpeg.avformat_free_context(pFcPtr);
 
             width = 0;
             height = 0;
@@ -287,7 +312,7 @@ namespace DaFenPlayer.Video.Decode
         internal void StopFFmpeg()
         {
             cts.Cancel();
-            decodeTask.Wait();
+            decodeTask?.Wait(1000);
 
             Release();
         }

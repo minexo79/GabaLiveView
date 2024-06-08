@@ -43,8 +43,8 @@ namespace DaFenPlayer.Video
 
         public void Start()
         {
-            ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived, OnLogReceived);
-            startPlay = new Task(() => ffmpegHelp.StartFFmpeg());
+            ffmpegHelp  = new FFmpegHelp(streamUrl, OnVideoReceived, OnLogReceived);
+            startPlay   = new Task(() => ffmpegHelp.StartFFmpeg());
             startPlay.Start();
 
 
@@ -58,14 +58,6 @@ namespace DaFenPlayer.Video
 
             connectLostTimer.Start();
         }
-
-        //void startFFmpeg()
-        //{
-        //    ffmpegHelp = new FFmpegHelp(streamUrl, OnVideoReceived);
-        //    ffmpegHelp.StartFFmpeg();
-
-        //    return;
-        //}
 
         public void Stop()
         {

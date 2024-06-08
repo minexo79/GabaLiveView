@@ -71,17 +71,15 @@ namespace DaFenPlayer.Video.Decode
                 // for thread safe, process one thing at a time
                 lock (lockObj)
                 {
-                    SKBitmap bmp = new SKBitmap(width, height);
-                    SKImageInfo imageInfo = new SKImageInfo(width, height, SKColorType.Rgb888x, SKAlphaType.Opaque);
 
-                    if (bmp.InstallPixels(imageInfo, frameBufferPtr, width * 4))
+                    if (videoBmp.InstallPixels(imageInfo, frameBufferPtr, width * 4))
                     {
-                        if (bmp != null)
+                        if (videoBmp != null)
                         {
                             // package the video frame
                             VideoReceiveArgs videoReceiveArgs = new VideoReceiveArgs() 
                             {
-                                videoBmp = bmp,
+                                videoBmp = videoBmp,
                                 width = width,
                                 height = height,
                                 framerate = framerate,
