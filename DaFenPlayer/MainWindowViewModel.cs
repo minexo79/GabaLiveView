@@ -29,7 +29,7 @@ namespace DaFenPlayer
         private int streamProtocol = 0;
 
         [ObservableProperty]
-        private string streamUrl = "localhost:554/genshin";
+        private string streamUrl = "localhost:554/senpai";
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;
