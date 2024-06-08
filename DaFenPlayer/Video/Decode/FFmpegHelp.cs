@@ -184,7 +184,7 @@ namespace DaFenPlayer.Video.Decode
 
             // new SKBitmap
             videoBmp = new SKBitmap((int)width, (int)height);
-            imageInfo = new SKImageInfo((int)width, (int)height, SKColorType.Bgra8888, SKAlphaType.Premul);
+            imageInfo = new SKImageInfo((int)width, (int)height, SKColorType.Rgb888x, SKAlphaType.Premul);
 
 
             // force to YUV420P
