@@ -1,4 +1,4 @@
-﻿using DaFenPlayer.Video;
+﻿using GabaLiveView.Video;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System.Text;
@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaFenPlayer
+namespace GabaLiveView
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -34,15 +34,11 @@ namespace DaFenPlayer
                 {
                     canvas.InvalidateVisual();
                 });
-            }
-;
+            };
         }
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
-            //if (!vm.isDrawing)
-            //    return;
-
             if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
             {
                 e.Surface.Canvas.DrawBitmap(vm.ReceiveArgs.videoBmp, e.Info.Rect);

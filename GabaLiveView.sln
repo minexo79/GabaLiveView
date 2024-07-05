@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaFenPlayer", "DaFenPlayer\DaFenPlayer.csproj", "{29B08E18-55F6-4CEE-9566-2B74993F720E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GabaLiveView", "GabaLiveView\GabaLiveView.csproj", "{29B08E18-55F6-4CEE-9566-2B74993F720E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaFenPlayer
+namespace GabaLiveView
 {
     /// <summary>
     /// Interaction logic for VideoInfomation.xaml

@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace DaFenPlayer
+namespace GabaLiveView
 {
     /// <summary>
     /// Interaction logic for App.xaml

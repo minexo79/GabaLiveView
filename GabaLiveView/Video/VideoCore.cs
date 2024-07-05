@@ -1,4 +1,4 @@
-﻿using DaFenPlayer.Video.Decode;
+﻿using GabaLiveView.Video.Decode;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Timer = System.Timers.Timer;
 
-namespace DaFenPlayer.Video
+namespace GabaLiveView.Video
 {
     internal class VideoCore
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FFmpeg.AutoGen;
 
-namespace DaFenPlayer.Video.Decode
+namespace GabaLiveView.Video.Decode
 {
     internal class FFmpegBinaryHelp
     {

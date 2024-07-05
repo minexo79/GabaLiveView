@@ -1,7 +1,7 @@
-﻿<Application x:Class="DaFenPlayer.App"
+﻿<Application x:Class="GabaLiveView.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:DaFenPlayer"
+             xmlns:local="clr-namespace:GabaLiveView"
              StartupUri="MainWindow.xaml"
              xmlns:ui="http://schemas.modernwpf.com/2019">
     <Application.Resources>

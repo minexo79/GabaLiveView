@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DaFenPlayer.Video.Decode
+namespace GabaLiveView.Video.Decode
 {
     public class LogArgs : EventArgs
     {
