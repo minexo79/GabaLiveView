@@ -13,13 +13,16 @@ using GabaLiveView.Video.Decode;
 using System.Windows;
 using System.Diagnostics;
 using System.Reflection;
+using System.Windows.Threading;
+using SkiaSharp.Views;
+using SkiaSharp.Views.Desktop;
+using SkiaSharp.Views.WPF;
 
 namespace GabaLiveView
 {
     internal partial class MainWindowViewModel : ObservableObject, INotifyPropertyChanged
     {
         VideoCore videoCore;
-        public EventHandler onVideoDrawFrontend;
         public bool isDrawing = false;
 
         [ObservableProperty]
@@ -38,6 +41,9 @@ namespace GabaLiveView
         private bool isButtonStopEnabled = true;
 
         [ObservableProperty]
+        private Visibility infoVisible = Visibility.Hidden;
+
+        [ObservableProperty]
         private string videoResolution = "";
 
         [ObservableProperty]
@@ -50,11 +56,30 @@ namespace GabaLiveView
         private string logMessage = "";
 
         Timer infoTimer = new Timer();
+        DispatcherTimer refreshTimer;
+        SKElement frontendCanvas;
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(ref SKElement canvas)
         {
-            infoTimer.Interval = 1000;
+            frontendCanvas = canvas;
+
+            infoTimer.Interval = 500;
             infoTimer.Elapsed += updateVideoInfoTimer;
+
+            refreshTimer = new DispatcherTimer();
+            refreshTimer.Interval = TimeSpan.FromMilliseconds(16);
+            refreshTimer.Tick += RefreshTimer_Tick;
+
+        }
+
+        private void RefreshTimer_Tick(object? sender, EventArgs e)
+        {
+            if (isDrawing)
+            {
+                isDrawing = false;
+
+                frontendCanvas.InvalidateVisual();
+            }
         }
 
         private void updateVideoInfoTimer(object? sender, System.Timers.ElapsedEventArgs e)
@@ -81,16 +106,23 @@ namespace GabaLiveView
                 videoCore.OnVideoReceived   += videoCore_OnVideoReceived;
                 videoCore.OnLogReceived     += VideoCore_OnLogReceived;
             }
+            else
+            {
+                videoCore.changeUrl(protocol + "://" + StreamUrl);
+            }
 
+            InfoVisible = Visibility.Visible;
             videoCore.Start();
             infoTimer.Start();
+            refreshTimer.Start();
         }
 
         [RelayCommand]
         public void ButtonStop()
         {
             IsButtonOpenEnabled = true;
-            //isDrawing = false;
+            isDrawing = false;
+            refreshTimer.Stop();
 
             if (videoCore != null)
             {
@@ -98,8 +130,9 @@ namespace GabaLiveView
 
                 // 2024.6.5 Blackcat: Add Blank Frame To Clear The Video
                 ReceiveArgs = null;
-                onVideoDrawFrontend?.Invoke(this, null);
+                frontendCanvas.InvalidateVisual();
 
+                InfoVisible = Visibility.Hidden;
                 infoTimer.Stop();
             }
         }
@@ -127,7 +160,7 @@ namespace GabaLiveView
         {
             ReceiveArgs = e;
 
-            onVideoDrawFrontend?.Invoke(this, null);
+            isDrawing = true;
         }
 
         private void VideoCore_OnLogReceived(object? sender, LogArgs e)

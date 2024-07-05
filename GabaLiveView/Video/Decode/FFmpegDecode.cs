@@ -22,7 +22,6 @@ namespace GabaLiveView.Video.Decode
     {
         object lockObj = new object();
         bool isBusy = false;
-        DateTime dateTime = DateTime.Now;
         
         internal unsafe void Decode(AVCodecContext * pCodecContext, AVPacket * pPacket, AVFrame* pFrame)
         {
@@ -59,27 +58,23 @@ namespace GabaLiveView.Video.Decode
                 // for thread safe, process one thing at a time
                 lock (lockObj)
                 {
-                    if ((DateTime.Now - dateTime).Milliseconds >= 16)
+                    if (videoBmp.InstallPixels(imageInfo, frameBufferPtr, width * 4))
                     {
-                        dateTime = DateTime.Now;
-                        if (videoBmp.InstallPixels(imageInfo, frameBufferPtr, width * 4))
+                        if (videoBmp != null)
                         {
-                            if (videoBmp != null)
+                            // package the video frame
+                            VideoReceiveArgs videoReceiveArgs = new VideoReceiveArgs()
                             {
-                                // package the video frame
-                                VideoReceiveArgs videoReceiveArgs = new VideoReceiveArgs()
-                                {
-                                    videoBmp = videoBmp,
-                                    width = width,
-                                    height = height,
-                                    framerate = framerate,
-                                    format = codecName
-                                };
+                                videoBmp = videoBmp,
+                                width = width,
+                                height = height,
+                                framerate = framerate,
+                                format = codecName
+                            };
 
-                                // use event to send video frame
-                                if (OnVideoReceived != null)
-                                    OnVideoReceived?.Invoke(this, videoReceiveArgs);
-                            }
+                            // use event to send video frame
+                            if (OnVideoReceived != null)
+                                OnVideoReceived?.Invoke(this, videoReceiveArgs);
                         }
                     }
                 }

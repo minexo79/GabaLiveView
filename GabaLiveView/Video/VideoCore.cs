@@ -21,7 +21,12 @@ namespace GabaLiveView.Video
         Timer connectLostTimer;
 
         public VideoCore(string url) 
-        { 
+        {
+            changeUrl(url);
+        }
+
+        public void changeUrl(string url)
+        {
             streamUrl = url;
         }
 

@@ -8,18 +8,34 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              mc:Ignorable="d" d:Height="Auto">
     <UserControl.Resources>
-        <Style x:Key="lblStyle" TargetType="Label" BasedOn="{StaticResource DefaultLabelStyle}">
-            <Setter Property="Margin" Value="2" />
+        <Style TargetType="Image">
+            <Setter Property="Margin" Value="5, 3, 5, 3" />
+            <Setter Property="Width" Value="24" />
         </Style>
+        <Style x:Key="lblStyle" TargetType="Label" BasedOn="{StaticResource DefaultLabelStyle}">
+            <Setter Property="Margin" Value="5, 3, 5, 3" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <BitmapImage x:Key="imgVideoRes" UriSource="Resources/resolution.png" />
+        <BitmapImage x:Key="imgVideoFps" UriSource="Resources/framerate.png" />
+        <BitmapImage x:Key="imgVideoFmt" UriSource="Resources/format.png" />
     </UserControl.Resources>
     <Grid>
+        <Border Background="#7F000000" BorderBrush="Black" CornerRadius="6">
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5"/>
+            </Border.Effect>
+        </Border>
         <StackPanel Orientation="Horizontal">
+            <Image Source="{StaticResource imgVideoRes}" />
             <Label Name="lblResolution" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoResolution}" Foreground="LightSkyBlue" />
+                   Content="{Binding VideoResolution}" Foreground="#EEEEEE" />
+            <Image Source="{StaticResource imgVideoFps}" />
             <Label Name="lblFramerate" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoFramerate}" Foreground="GreenYellow" />
+                   Content="{Binding VideoFramerate}" Foreground="#F4CE14" />
+            <Image Source="{StaticResource imgVideoFmt}" />
             <Label Name="lblBitrate" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoFormat}" Foreground="IndianRed" />
+                   Content="{Binding VideoFormat}" Foreground="#9BEC00" />
         </StackPanel>
     </Grid>
 </UserControl>

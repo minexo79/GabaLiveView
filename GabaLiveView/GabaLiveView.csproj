@@ -13,6 +13,9 @@
 
   <ItemGroup>
     <None Remove="Resources\app.png" />
+    <None Remove="Resources\format.png" />
+    <None Remove="Resources\framerate.png" />
+    <None Remove="Resources\resolution.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +35,9 @@
 
   <ItemGroup>
     <Resource Include="Resources\app.png" />
+    <Resource Include="Resources\format.png" />
+    <Resource Include="Resources\framerate.png" />
+    <Resource Include="Resources\resolution.png" />
   </ItemGroup>
 
   <ItemGroup>

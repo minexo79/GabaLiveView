@@ -46,13 +46,9 @@ namespace GabaLiveView.Video.Decode
 
         // stream url
         string streamUrl = "";
-
-        // log lock
-        object logLock = new object();
-
         // task
         Task decodeTask;
-        CancellationTokenSource cts;
+        bool isPlaying = false;
 
         public FFmpegHelp(string _url, EventHandler<VideoReceiveArgs> onVideoReceived, EventHandler<LogArgs> onLogReceived)
         {
@@ -62,7 +58,6 @@ namespace GabaLiveView.Video.Decode
             OnLogReceived = onLogReceived;
 
             lastFrameDateTime = DateTime.Now;
-            cts = new CancellationTokenSource();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -75,10 +70,7 @@ namespace GabaLiveView.Video.Decode
                 videoBmp?.Dispose();
                 videoBmp = null;
 
-                cts?.Dispose();
-                cts = null;
-
-                logLock = null;
+                isPlaying = false;
             }
         }
 
@@ -94,7 +86,7 @@ namespace GabaLiveView.Video.Decode
         {
             Init();
             GetEncode();
-            decodeTask = new Task(() => StartDecode(), cts.Token);
+            decodeTask = new Task(() => StartDecode());
             decodeTask.Start();
         }
 
@@ -108,12 +100,6 @@ namespace GabaLiveView.Video.Decode
 
             // set log 
             ffmpeg.av_log_set_level(ffmpeg.AV_LOG_ERROR);
-
-            // TODO: Prevent ExecutionEngineException
-            //av_log_set_callback_callback callback = 
-            //    (void* ptr, int level, string fmt, byte* vl) => FFmpegLogCallback(ptr, level, fmt, vl);
-
-            //ffmpeg.av_log_set_callback(callback);
         }
 
         void Init()
@@ -140,8 +126,6 @@ namespace GabaLiveView.Video.Decode
                 Console.WriteLine("==> Error: " + errCode);
                 return;
             }
-
-            isOpen = true;
 
 
             // find stream info
@@ -218,6 +202,9 @@ namespace GabaLiveView.Video.Decode
             // set graphic fill
             ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize, (byte*)convertedFrameBufferPtr.ToPointer(),
                                         dstPixfmt, (int)width, (int)height, 1);
+
+            isOpen = true;
+            isPlaying = true;
         }
 
         Task StartDecode()
@@ -280,10 +267,10 @@ namespace GabaLiveView.Video.Decode
                 }
                 else
                 {
-                    break;
+                    isPlaying = false;
                 }
             } 
-            while (cts != null && !cts.Token.IsCancellationRequested);
+            while (isPlaying);
 
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
@@ -298,14 +285,16 @@ namespace GabaLiveView.Video.Decode
             AVFormatContext* pFcPtr = pFc;
             AVCodecContext* pCodecContextPtr = pCodecContext;
 
-            Marshal.FreeHGlobal(convertedFrameBufferPtr);
-            ffmpeg.sws_freeContext(pConvertContext);
-            ffmpeg.avcodec_free_context(&pCodecContextPtr);
-
             if (isOpen)
+            {
                 ffmpeg.avformat_close_input(&pFcPtr);
 
-            ffmpeg.avformat_free_context(pFcPtr);
+                Marshal.FreeHGlobal(convertedFrameBufferPtr);
+                ffmpeg.sws_freeContext(pConvertContext);
+                ffmpeg.avcodec_free_context(&pCodecContextPtr);
+
+                ffmpeg.avformat_free_context(pFcPtr);
+            }
 
             width = 0;
             height = 0;
@@ -315,7 +304,7 @@ namespace GabaLiveView.Video.Decode
 
         internal void StopFFmpeg()
         {
-            cts.Cancel();
+            isPlaying = false;
             decodeTask?.Wait(1000);
 
             Thread.Sleep(100);

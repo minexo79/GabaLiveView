@@ -19,22 +19,16 @@ namespace GabaLiveView
     /// </summary>
     public partial class MainWindow : Window
     {
-        MainWindowViewModel vm = new MainWindowViewModel();
+        MainWindowViewModel vm;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            vm = new MainWindowViewModel(ref canvas);
+
             this.DataContext = vm;
             videoInfoControl.DataContext = vm;
-
-            vm.onVideoDrawFrontend = (sender, e) =>
-            {
-                canvas.Dispatcher.Invoke(() =>
-                {
-                    canvas.InvalidateVisual();
-                });
-            };
         }
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
@@ -42,7 +36,6 @@ namespace GabaLiveView
             if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
             {
                 e.Surface.Canvas.DrawBitmap(vm.ReceiveArgs.videoBmp, e.Info.Rect);
-                e.Surface.Canvas.Flush();
             }
             else
             {
