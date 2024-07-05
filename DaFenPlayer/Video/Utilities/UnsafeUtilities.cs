@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DaFenPlayer.Video.Utilities
+namespace GabaLiveView.Video.Utilities
 {
     internal unsafe class UnsafeUtilities
     {

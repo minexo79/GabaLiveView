@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using SkiaSharp;
 using FFmpeg.AutoGen;
-using DaFenPlayer.Video.Utilities;
+using GabaLiveView.Video.Utilities;
 
-namespace DaFenPlayer.Video.Decode
+namespace GabaLiveView.Video.Decode
 {
     internal unsafe partial class FFmpegHelp : IDisposable
     {
@@ -277,6 +277,10 @@ namespace DaFenPlayer.Video.Decode
                     //Console.WriteLine("2");
                     Decode(pCodecContext, pPacket, pFrame);
                     //Console.WriteLine("3");
+                }
+                else
+                {
+                    cts.Cancel();
                 }
             } 
             while (!cts.Token.IsCancellationRequested);

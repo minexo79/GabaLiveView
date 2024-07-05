@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DaFenPlayer.Video;
-using DaFenPlayer.Video.Decode;
+using GabaLiveView.Video;
+using GabaLiveView.Video.Decode;
 using System.Windows;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace DaFenPlayer
+namespace GabaLiveView
 {
     internal partial class MainWindowViewModel : ObservableObject, INotifyPropertyChanged
     {
@@ -29,7 +29,7 @@ namespace DaFenPlayer
         private int streamProtocol = 0;
 
         [ObservableProperty]
-        private string streamUrl = "localhost:554/senpai";
+        private string streamUrl = "localhost:554/twelve-girl";
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;

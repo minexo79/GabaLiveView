@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 
-namespace DaFenPlayer.Video.Decode
+namespace GabaLiveView.Video.Decode
 {
     public class VideoReceiveArgs : EventArgs
     {
@@ -22,14 +22,10 @@ namespace DaFenPlayer.Video.Decode
     {
         object lockObj = new object();
         bool isBusy = false;
-
+        DateTime dateTime = DateTime.Now;
+        
         internal unsafe void Decode(AVCodecContext * pCodecContext, AVPacket * pPacket, AVFrame* pFrame)
         {
-            if (cts.IsCancellationRequested)
-            {
-                return;
-            }
-
             if (pPacket->stream_index != videoStreamIndex)
             {
                 return;
@@ -46,49 +42,44 @@ namespace DaFenPlayer.Video.Decode
                 if (ffmpeg.avcodec_receive_frame(pCodecContext, pFrame) == 0)
                 {
                     // Console.WriteLine("3");
-                    // convert frame YUV->RGB
                     ffmpeg.sws_scale(pConvertContext, pFrame->data, pFrame->linesize, 0,
                                         pCodecContext->height, dstData, dstLinesize);
 
                     // Console.WriteLine("4");
                     lastFrameDateTime = DateTime.Now;
                     Render((int)width, (int)height, convertedFrameBufferPtr, dstLinesize[0]);
-
-                    ffmpeg.av_packet_unref(pPacket);
                 }
             }
         }
 
         internal unsafe void Render(int width, int height, IntPtr frameBufferPtr, int rowByte)
         {
-            if (cts.IsCancellationRequested)
-            {
-                return;
-            }
-
             try
             {
                 // for thread safe, process one thing at a time
                 lock (lockObj)
                 {
-
-                    if (videoBmp.InstallPixels(imageInfo, frameBufferPtr, width * 4))
+                    if ((DateTime.Now - dateTime).Milliseconds >= 16)
                     {
-                        if (videoBmp != null)
+                        dateTime = DateTime.Now;
+                        if (videoBmp.InstallPixels(imageInfo, frameBufferPtr, width * 4))
                         {
-                            // package the video frame
-                            VideoReceiveArgs videoReceiveArgs = new VideoReceiveArgs() 
+                            if (videoBmp != null)
                             {
-                                videoBmp = videoBmp,
-                                width = width,
-                                height = height,
-                                framerate = framerate,
-                                format = codecName
-                            };
+                                // package the video frame
+                                VideoReceiveArgs videoReceiveArgs = new VideoReceiveArgs()
+                                {
+                                    videoBmp = videoBmp,
+                                    width = width,
+                                    height = height,
+                                    framerate = framerate,
+                                    format = codecName
+                                };
 
-                            // use event to send video frame
-                            if (OnVideoReceived != null)
-                                OnVideoReceived?.Invoke(this, videoReceiveArgs);
+                                // use event to send video frame
+                                if (OnVideoReceived != null)
+                                    OnVideoReceived?.Invoke(this, videoReceiveArgs);
+                            }
                         }
                     }
                 }
