@@ -118,7 +118,7 @@ namespace GabaLiveView
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/minexo79/ffmpegplayer",
+                FileName = "https://github.com/minexo79/GabaLiveView",
                 UseShellExecute = true
             });
         }

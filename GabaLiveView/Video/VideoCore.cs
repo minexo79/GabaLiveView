@@ -32,7 +32,7 @@ namespace GabaLiveView.Video
 
         private void connectLostTimerCallback(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            if (DateTime.Now.Subtract(ffmpegHelp.lastFrameDateTime).TotalSeconds > 10)
+            if (DateTime.Now.Subtract(ffmpegHelp.lastFrameDateTime).TotalSeconds > 3)
             {
                 Console.WriteLine("==> Timeout, Restart...");
 

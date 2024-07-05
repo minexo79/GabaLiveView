@@ -42,6 +42,7 @@ namespace GabaLiveView
             if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
             {
                 e.Surface.Canvas.DrawBitmap(vm.ReceiveArgs.videoBmp, e.Info.Rect);
+                e.Surface.Canvas.Flush();
             }
             else
             {

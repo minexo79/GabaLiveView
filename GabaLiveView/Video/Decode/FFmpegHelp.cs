@@ -124,7 +124,7 @@ namespace GabaLiveView.Video.Decode
             // set optimize flag
             AVDictionary* options = null;
             ffmpeg.av_dict_set(&options, "rtsp_transport", "tcp", 0);
-            ffmpeg.av_dict_set(&options, "stimeout", "2000000", 0);         // max timeout 2 seconds
+            ffmpeg.av_dict_set(&options, "stimeout", "1000000", 0);         // max timeout 2 seconds
             ffmpeg.av_dict_set(&options, "fflags", "nobuffer", 0);          // no buffer
             ffmpeg.av_dict_set(&options, "fflags", "discardcorrupt", 0);    // discard corrupted frames
             ffmpeg.av_dict_set(&options, "flags", "low_delay", 0);          // no delay
@@ -267,7 +267,7 @@ namespace GabaLiveView.Video.Decode
                 ffmpeg.av_packet_unref(pPacket);
 
                 //Console.WriteLine("1");
-                if (ffmpeg.av_read_frame(pFcPtr, pPacket) != ffmpeg.AVERROR_EOF)
+                if (ffmpeg.av_read_frame(pFcPtr, pPacket) >= 0)
                 {
                     // 2024.6.5 Blackcat: Use av_guess_frame_rate instead r_framerate to get the **real** framerate
                     AVRational avFpsRational = ffmpeg.av_guess_frame_rate(pFc, pStream, null);
@@ -280,10 +280,10 @@ namespace GabaLiveView.Video.Decode
                 }
                 else
                 {
-                    cts.Cancel();
+                    break;
                 }
             } 
-            while (!cts.Token.IsCancellationRequested);
+            while (cts != null && !cts.Token.IsCancellationRequested);
 
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
@@ -317,6 +317,8 @@ namespace GabaLiveView.Video.Decode
         {
             cts.Cancel();
             decodeTask?.Wait(1000);
+
+            Thread.Sleep(100);
 
             Release();
         }
