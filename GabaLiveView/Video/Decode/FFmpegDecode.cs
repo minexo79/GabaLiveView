@@ -16,19 +16,24 @@ namespace GabaLiveView.Video.Decode
         public int height { get; set; }
         public float framerate { get; set; }
         public string format { get; set; }
+        public float bitrate { get; set; }
     }
 
     internal unsafe partial class FFmpegHelp : IDisposable
     {
+        internal float _bitrate = 0;
+
         object lockObj = new object();
         bool isBusy = false;
         
-        internal unsafe void Decode(AVCodecContext * pCodecContext, AVPacket * pPacket, AVFrame* pFrame)
+        internal unsafe void Decode(AVCodecContext * pCodecContext, AVPacket * pPacket, AVFrame* pFrame, float bitrate)
         {
             if (pPacket->stream_index != videoStreamIndex)
             {
                 return;
             }
+
+            _bitrate = bitrate;
 
             // Console.WriteLine("1");
             if (ffmpeg.avcodec_send_packet(pCodecContext, pPacket) == 0)
@@ -69,6 +74,7 @@ namespace GabaLiveView.Video.Decode
                                 width = width,
                                 height = height,
                                 framerate = framerate,
+                                bitrate = _bitrate,
                                 format = codecName
                             };
 

@@ -38,9 +38,6 @@ namespace GabaLiveView
         private bool isButtonOpenEnabled = true;
 
         [ObservableProperty]
-        private bool isButtonStopEnabled = true;
-
-        [ObservableProperty]
         private Visibility infoVisible = Visibility.Hidden;
 
         [ObservableProperty]
@@ -48,6 +45,9 @@ namespace GabaLiveView
 
         [ObservableProperty]
         private string videoFramerate = "";
+
+        [ObservableProperty]
+        private string videoBitrate = "";
 
         [ObservableProperty]
         private string videoFormat = "";
@@ -89,6 +89,7 @@ namespace GabaLiveView
                 VideoResolution = ReceiveArgs.width + "x" + ReceiveArgs.height;
                 VideoFramerate  = ReceiveArgs.framerate.ToString("0.00") + " Fps";
                 VideoFormat     = ReceiveArgs.format;
+                VideoBitrate    = ReceiveArgs.bitrate.ToString("0.00") + " Kbps";
             }
         }
 

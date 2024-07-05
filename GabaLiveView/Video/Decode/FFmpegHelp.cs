@@ -253,16 +253,19 @@ namespace GabaLiveView.Video.Decode
                 ffmpeg.av_frame_unref(pFrame);
                 ffmpeg.av_packet_unref(pPacket);
 
+                _bitrate = pCodecParams.bit_rate / 1000f;
+
                 //Console.WriteLine("1");
                 if (ffmpeg.av_read_frame(pFcPtr, pPacket) >= 0)
                 {
+
                     // 2024.6.5 Blackcat: Use av_guess_frame_rate instead r_framerate to get the **real** framerate
                     AVRational avFpsRational = ffmpeg.av_guess_frame_rate(pFc, pStream, null);
                     framerate = avFpsRational.num / (float)avFpsRational.den;
                     // 2024.6.5 Blackcat: Rescale the packet timestamp to the stream timebase
                     ffmpeg.av_packet_rescale_ts(pPacket, pStream->time_base, pCodecContext->time_base);
                     //Console.WriteLine("2");
-                    Decode(pCodecContext, pPacket, pFrame);
+                    Decode(pCodecContext, pPacket, pFrame, _bitrate);
                     //Console.WriteLine("3");
                 }
                 else
