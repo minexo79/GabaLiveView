@@ -29,10 +29,10 @@ namespace GabaLiveView
         private VideoReceiveArgs receiveArgs = null;
 
         [ObservableProperty]
-        private int streamProtocol = 0;
+        private int streamProtocol = App.StreamProtocol;
 
         [ObservableProperty]
-        private string streamUrl = "localhost:554/twelve-girl";
+        private string streamUrl = App.StreamUrl;
 
         [ObservableProperty]
         private bool isButtonOpenEnabled = true;
@@ -141,9 +141,7 @@ namespace GabaLiveView
         [RelayCommand]
         public void MenuAbout()
         {
-            string ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-            MessageBox.Show($"Version: {ver}\nAuthor: XOT(minexo79)\nMail: minexo79@gmail.com", "About", 
+            MessageBox.Show($"Version: {App.ver}\nAuthor: XOT(minexo79)\nMail: minexo79@gmail.com", "About", 
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 

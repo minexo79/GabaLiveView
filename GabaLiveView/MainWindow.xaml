@@ -8,7 +8,8 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         xmlns:local="clr-namespace:GabaLiveView"
         mc:Ignorable="d"
-        Title="GabaLiveView" Height="720" Width="1080">
+        Title="GabaLiveView" Height="720" Width="1080"
+        Closing="Window_Closing">
     <Window.Resources>
         <Style x:Key="comboxStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
             <Setter Property="Margin" Value="3" />

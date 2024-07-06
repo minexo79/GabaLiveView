@@ -74,7 +74,7 @@ namespace GabaLiveView.Video.Decode
                                 width = width,
                                 height = height,
                                 framerate = framerate,
-                                bitrate = _bitrate,
+                                bitrate = networkUsage.ReceivedBytes,
                                 format = codecName
                             };
 

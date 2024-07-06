@@ -1,4 +1,5 @@
-﻿using GabaLiveView.Video;
+﻿using GabaLiveView.Utilities;
+using GabaLiveView.Video;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System.Text;
@@ -33,16 +34,35 @@ namespace GabaLiveView
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
-            if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
+            try
             {
-                e.Surface.Canvas.DrawBitmap(vm.ReceiveArgs.videoBmp, e.Info.Rect);
+
+                if (vm.ReceiveArgs != null && vm.ReceiveArgs.videoBmp != null)
+                {
+                    e.Surface.Canvas.DrawBitmap(vm.ReceiveArgs.videoBmp, e.Info.Rect);
+                }
+                else
+                {
+                    e.Surface.Canvas.Clear();
+                }
             }
-            else
+            catch (ArgumentException)
             {
-                e.Surface.Canvas.Clear();
+                // pass
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // save ini
+            IniOpreration iniOpreration = new IniOpreration();
 
+            iniOpreration.Write("StreamProtocol", vm.StreamProtocol.ToString());
+            iniOpreration.Write("StreamUrl", vm.StreamUrl);
+        }
     }
 }

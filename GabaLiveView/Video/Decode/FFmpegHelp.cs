@@ -44,6 +44,9 @@ namespace GabaLiveView.Video.Decode
         // last frame time record
         internal DateTime lastFrameDateTime;
 
+        // Network Usage
+        NetworkUsageUtilities networkUsage = new NetworkUsageUtilities();
+
         // stream url
         string streamUrl = "";
         // task
@@ -248,6 +251,8 @@ namespace GabaLiveView.Video.Decode
             AVPacket* pPacket = ffmpeg.av_packet_alloc();   // allocate packet
             AVFrame* pFrame = ffmpeg.av_frame_alloc();      // allocate frame
 
+            networkUsage.Start();
+
             do
             {
                 ffmpeg.av_frame_unref(pFrame);
@@ -277,6 +282,8 @@ namespace GabaLiveView.Video.Decode
 
             ffmpeg.av_frame_free(&pFrame);
             ffmpeg.av_packet_free(&pPacket);
+
+            networkUsage.Stop();
 
             return Task.CompletedTask;
         }
