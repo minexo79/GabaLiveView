@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using SkiaSharp;
 using FFmpeg.AutoGen;
-using GabaLiveView.Video.Utilities;
+using GabaLiveView.Video.FFmpegVideoCore.Utilities;
 
-namespace GabaLiveView.Video.Decode
+namespace GabaLiveView.Video.FFmpegVideoCore.Decode
 {
     internal unsafe partial class FFmpegHelp : IDisposable
     {
@@ -87,8 +87,11 @@ namespace GabaLiveView.Video.Decode
 
         internal void StartFFmpeg()
         {
+            OnLogReceived?.Invoke(this, new LogArgs() { logMessage = "Stream Starting..." });
+
             Init();
             GetEncode();
+
             decodeTask = new Task(() => StartDecode());
             decodeTask.Start();
         }
@@ -252,6 +255,7 @@ namespace GabaLiveView.Video.Decode
             AVFrame* pFrame = ffmpeg.av_frame_alloc();      // allocate frame
 
             networkUsage.Start();
+            OnLogReceived?.Invoke(this, new LogArgs() { logMessage = "Stream Started." });
 
             do
             {
@@ -320,6 +324,8 @@ namespace GabaLiveView.Video.Decode
             Thread.Sleep(100);
 
             Release();
+
+            OnLogReceived?.Invoke(this, new LogArgs() { logMessage = "Stream Stopped." });
         }
     }
 }

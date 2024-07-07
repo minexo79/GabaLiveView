@@ -9,36 +9,36 @@
              mc:Ignorable="d" d:Height="Auto">
     <UserControl.Resources>
         <Style TargetType="Image">
-            <Setter Property="Margin" Value="5,3,5,3" />
-            <Setter Property="Width" Value="24" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Width" Value="16" />
         </Style>
         <Style x:Key="lblStyle" TargetType="Label" BasedOn="{StaticResource DefaultLabelStyle}">
-            <Setter Property="Margin" Value="5,3,5,3" />
+            <Setter Property="Margin" Value="5" />
         </Style>
-        <BitmapImage x:Key="imgVideoRes" UriSource="Resources/resolution.png" />
-        <BitmapImage x:Key="imgVideoFps" UriSource="Resources/framerate.png" />
-        <BitmapImage x:Key="imgVideoFmt" UriSource="Resources/format.png" />
-        <BitmapImage x:Key="imgVideoBrt" UriSource="Resources/bitrate.png" />
+        <BitmapImage x:Key="imgVideoRes" UriSource="pack://application:,,,/Resources/resolution.png" />
+        <BitmapImage x:Key="imgVideoFps" UriSource="pack://application:,,,/Resources/framerate.png" />
+        <BitmapImage x:Key="imgVideoFmt" UriSource="pack://application:,,,/Resources/format.png" />
+        <BitmapImage x:Key="imgVideoBrt" UriSource="pack://application:,,,/Resources/bitrate.png" />
     </UserControl.Resources>
     <Grid VerticalAlignment="Center">
-        <Border Background="#7F000000" BorderBrush="Black" CornerRadius="6">
+        <Border Background="#7F000000" CornerRadius="6">
             <Border.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="1"/>
             </Border.Effect>
         </Border>
         <ui:SimpleStackPanel Orientation="Horizontal">
-            <Image Source="{StaticResource imgVideoRes}" />
+            <Image Source="{DynamicResource imgVideoRes}" />
             <Label Name="lblResolution" Style="{Binding lblStyle}" 
                    Content="{Binding VideoResolution}" Foreground="#EEEEEE" />
-            <Image Source="{StaticResource imgVideoFps}" />
+            <Image Source="{DynamicResource imgVideoFps}" />
             <Label Name="lblFramerate" Style="{Binding lblStyle}" 
                    Content="{Binding VideoFramerate}" Foreground="#F4CE14" />
-            <Image Source="{StaticResource imgVideoFmt}" />
+            <Image Source="{DynamicResource imgVideoFmt}" />
             <Label Name="lblFormat" Style="{Binding lblStyle}" 
                    Content="{Binding VideoFormat}" Foreground="#9BEC00" />
-            <Image Source="{StaticResource imgVideoBrt}" />
+            <Image Source="{DynamicResource imgVideoBrt}" />
             <Label Name="lblBitrate" Style="{Binding lblStyle}" 
-                   Content="{Binding VideoBitrate}" Foreground="#A0E9FF" />
+                   Content="{Binding VideoBitrate}" Foreground="#44C0FF" />
         </ui:SimpleStackPanel>
 
     </Grid>

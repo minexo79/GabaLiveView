@@ -9,7 +9,8 @@ using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GabaLiveView.Video;
-using GabaLiveView.Video.Decode;
+using GabaLiveView.Video.FFmpegVideoCore;
+using GabaLiveView.Video.FFmpegVideoCore.Decode;
 using System.Windows;
 using System.Diagnostics;
 using System.Reflection;
@@ -22,7 +23,7 @@ namespace GabaLiveView
 {
     internal partial class MainWindowViewModel : ObservableObject, INotifyPropertyChanged
     {
-        VideoCore videoCore;
+        IVideoCore videoCore;
         public bool isDrawing = false;
 
         [ObservableProperty]
@@ -41,16 +42,22 @@ namespace GabaLiveView
         private Visibility infoVisible = Visibility.Hidden;
 
         [ObservableProperty]
-        private string videoResolution = "";
+        private Visibility topBarVisible = Visibility.Visible;
 
         [ObservableProperty]
-        private string videoFramerate = "";
+        private Visibility topButtonVisible = Visibility.Hidden;
 
         [ObservableProperty]
-        private string videoBitrate = "";
+        private string videoResolution = "N/A";
 
         [ObservableProperty]
-        private string videoFormat = "";
+        private string videoFramerate = "N/A";
+
+        [ObservableProperty]
+        private string videoBitrate = "N/A";
+
+        [ObservableProperty]
+        private string videoFormat = "N/A";
 
         [ObservableProperty]
         private string logMessage = "";
@@ -66,6 +73,7 @@ namespace GabaLiveView
             infoTimer.Interval = 500;
             infoTimer.Elapsed += updateVideoInfoTimer;
 
+            // 2024.7.5 Blackcat: Use Timer For Refreshing The Video (Prevent Calling Dispatcher Too Much Cause Playing Slowly)
             refreshTimer = new DispatcherTimer();
             refreshTimer.Interval = TimeSpan.FromMilliseconds(16);
             refreshTimer.Tick += RefreshTimer_Tick;
@@ -74,6 +82,7 @@ namespace GabaLiveView
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
         {
+            // if frame is new, draw it
             if (isDrawing)
             {
                 isDrawing = false;
@@ -103,9 +112,9 @@ namespace GabaLiveView
 
             if (videoCore == null)
             {
-                videoCore = new VideoCore(protocol + "://" + StreamUrl);
+                videoCore = new FFmpegVideoCore(protocol + "://" + StreamUrl);
                 videoCore.OnVideoReceived   += videoCore_OnVideoReceived;
-                videoCore.OnLogReceived     += VideoCore_OnLogReceived;
+                videoCore.OnLogReceived     += videoCore_OnLogReceived;
             }
             else
             {
@@ -155,14 +164,28 @@ namespace GabaLiveView
             });
         }
 
+        [RelayCommand]
+        public void ButtonHideTopBar()
+        {
+            TopBarVisible = Visibility.Collapsed;
+            TopButtonVisible = Visibility.Visible;
+        }
+
+        [RelayCommand]
+        public void ButtonShowTopBar()
+        {
+            TopBarVisible = Visibility.Visible;
+            TopButtonVisible = Visibility.Hidden;
+        }
+
+
         private void videoCore_OnVideoReceived(object? sender, VideoReceiveArgs e)
         {
             ReceiveArgs = e;
-
             isDrawing = true;
         }
 
-        private void VideoCore_OnLogReceived(object? sender, LogArgs e)
+        private void videoCore_OnLogReceived(object? sender, LogArgs e)
         {
             LogMessage = e.logMessage ?? "";
         }

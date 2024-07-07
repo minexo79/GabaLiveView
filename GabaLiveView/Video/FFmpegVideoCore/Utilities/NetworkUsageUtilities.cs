@@ -5,8 +5,9 @@ using System.Linq;
 using System.Text;
 using Timer = System.Timers.Timer;
 using System.Threading.Tasks;
+using System.IO;
 
-namespace GabaLiveView.Video.Utilities
+namespace GabaLiveView.Video.FFmpegVideoCore.Utilities
 {
     internal class NetworkUsageUtilities
     {
@@ -27,8 +28,7 @@ namespace GabaLiveView.Video.Utilities
             process = Process.GetCurrentProcess();
 
             process_id = process.Id;
-            instanceName = performanceCounterCategory.GetInstanceNames()
-                .FirstOrDefault(name => name.StartsWith(process.ProcessName));
+            instanceName = process.ProcessName ?? String.Empty;
             
 
             if (instanceName == String.Empty)
@@ -37,7 +37,7 @@ namespace GabaLiveView.Video.Utilities
             }
 
             bytesReceivedCounter = new PerformanceCounter("Process", "IO Read Bytes/sec", instanceName);
-            bytesSentCounter = new PerformanceCounter("Process", "IO Write Bytes/sec", instanceName);
+            bytesSentCounter    = new PerformanceCounter("Process", "IO Write Bytes/sec", instanceName);
 
             networkUsageTimer = new Timer();
             networkUsageTimer.Interval = 1000;

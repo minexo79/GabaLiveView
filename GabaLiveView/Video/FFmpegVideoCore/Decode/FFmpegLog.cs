@@ -5,14 +5,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using GabaLiveView.Video;
 
-namespace GabaLiveView.Video.Decode
+namespace GabaLiveView.Video.FFmpegVideoCore.Decode
 {
-    public class LogArgs : EventArgs
-    {
-        public DateTime dateTime { get; set; }
-        public string logMessage { get; set; } = String.Empty;
-    }
 
     internal unsafe partial class FFmpegHelp : IDisposable
     {

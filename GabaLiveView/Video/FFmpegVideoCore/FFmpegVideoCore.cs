@@ -1,15 +1,15 @@
-﻿using GabaLiveView.Video.Decode;
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GabaLiveView.Video.FFmpegVideoCore.Decode;
 using Timer = System.Timers.Timer;
 
-namespace GabaLiveView.Video
+namespace GabaLiveView.Video.FFmpegVideoCore
 {
-    internal class VideoCore
+    internal class FFmpegVideoCore : IVideoCore
     {
         public event EventHandler<VideoReceiveArgs> OnVideoReceived;
         public event EventHandler<LogArgs> OnLogReceived;
@@ -20,7 +20,7 @@ namespace GabaLiveView.Video
         Task startPlay;
         Timer connectLostTimer;
 
-        public VideoCore(string url) 
+        public FFmpegVideoCore(string url) 
         {
             changeUrl(url);
         }
@@ -40,6 +40,7 @@ namespace GabaLiveView.Video
             if (DateTime.Now.Subtract(ffmpegHelp.lastFrameDateTime).TotalSeconds > 3)
             {
                 Console.WriteLine("==> Timeout, Restart...");
+                OnLogReceived?.Invoke(this, new LogArgs() { logMessage = "Stream Losted, Restarting...." });
 
                 Stop();
                 Start();

@@ -6,18 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
+using GabaLiveView.Video;
 
-namespace GabaLiveView.Video.Decode
-{
-    public class VideoReceiveArgs : EventArgs
-    {
-        public SKBitmap videoBmp { get; set; }
-        public int width { get; set; }
-        public int height { get; set; }
-        public float framerate { get; set; }
-        public string format { get; set; }
-        public float bitrate { get; set; }
-    }
+namespace GabaLiveView.Video.FFmpegVideoCore.Decode
+{ 
 
     internal unsafe partial class FFmpegHelp : IDisposable
     {

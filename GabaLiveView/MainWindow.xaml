@@ -9,6 +9,7 @@
         xmlns:local="clr-namespace:GabaLiveView"
         mc:Ignorable="d"
         Title="GabaLiveView" Height="720" Width="1080"
+        MinHeight="480" MinWidth="720"
         Closing="Window_Closing">
     <Window.Resources>
         <Style x:Key="comboxStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
@@ -19,14 +20,16 @@
             <Setter Property="Margin" Value="3" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
+        <BitmapImage x:Key="imgStatus" UriSource="pack://application:,,,/Resources/info.png" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <!-- Toolbar -->
-        <ui:CommandBar Grid.Row="0" VerticalContentAlignment="Center">
+        <ui:CommandBar Grid.Row="0" VerticalContentAlignment="Center" Visibility="{Binding TopBarVisible}">
             <ui:CommandBar.Content>
                 <ui:SimpleStackPanel Orientation="Horizontal">
                     <ComboBox x:Name="cbxSelect" SelectedIndex="{Binding StreamProtocol, Mode=TwoWay}" Style="{StaticResource comboxStyle}">
@@ -49,16 +52,36 @@
                     </ui:MenuFlyout>
                 </ui:AppBarButton.Flyout>
             </ui:AppBarButton>
+            <ui:AppBarButton Icon="Up" Command="{Binding ButtonHideTopBarCommand}" />
         </ui:CommandBar>
+        <!-- Show Top Bar -->
+        <Button Grid.Row="1" Panel.ZIndex="2" Margin="0,10,10,0"
+                Content="▼" FontSize="20"
+                Visibility="{Binding TopButtonVisible}"
+                Command="{Binding ButtonShowTopBarCommand}"
+                VerticalAlignment="Top" HorizontalAlignment="Right" />
         <!-- Video Infomation -->
         <local:VideoInfomation Grid.Row="1" Panel.ZIndex="2" Margin="0,10" 
                                Visibility="{Binding InfoVisible}"
                                x:Name="videoInfoControl" VerticalAlignment="Top" HorizontalAlignment="Center" />
+        <!-- Video VideoControl -->
+        <local:VideoControl Grid.Row="1" Panel.ZIndex="2" Margin="0,0,10,0"
+                            Visibility="{Binding InfoVisible}"
+                            x:Name="videoOpControl" VerticalAlignment="Center" HorizontalAlignment="Right" />
         <!-- Video Showing -->
         <views:SKElement Grid.Row="1" Panel.ZIndex="1"
                          x:Name="canvas" 
                          PaintSurface="canvas_PaintSurface" />
         <!-- App Icon -->
         <Image Panel.ZIndex="0" Grid.Row="1" Source="/Resources/app.png" Width="256" />
+        <!-- Status -->
+        <StatusBar Grid.Row="2" VerticalAlignment="Center" Height="24">
+            <StatusBarItem>
+                <ui:SimpleStackPanel Orientation="Horizontal">
+                    <Image Source="{DynamicResource imgStatus}" />
+                    <TextBlock Text="{Binding LogMessage}" Margin="5,0" />
+                </ui:SimpleStackPanel>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

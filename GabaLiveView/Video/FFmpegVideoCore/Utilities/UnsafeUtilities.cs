@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GabaLiveView.Video.Utilities
+namespace GabaLiveView.Video.FFmpegVideoCore.Utilities
 {
     internal unsafe class UnsafeUtilities
     {
