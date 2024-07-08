@@ -42,16 +42,16 @@ namespace GabaLiveView
         private Visibility topButtonVisible = Visibility.Hidden;
 
         [ObservableProperty]
-        private string videoResolution = "N/A";
+        private string videoResolution = "Unknown";
 
         [ObservableProperty]
-        private string videoFramerate = "N/A";
+        private string videoFramerate = "Unknown";
 
         [ObservableProperty]
-        private string videoBitrate = "N/A";
+        private string videoBitrate = "Unknown";
 
         [ObservableProperty]
-        private string videoFormat = "N/A";
+        private string videoFormat = "Unknown";
 
         [ObservableProperty]
         private string logMessage = "";

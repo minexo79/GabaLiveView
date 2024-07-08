@@ -65,13 +65,13 @@
             <ui:AppBarButton Icon="Up" Command="{Binding ButtonHideTopBarCommand}" />
         </ui:CommandBar>
         <!-- Show Top Bar -->
-        <Button Grid.Row="0" Panel.ZIndex="2" Margin="0,5,10,0"
+        <Button Grid.Row="1" Panel.ZIndex="2" Margin="0,10,10,0"
                 Content="▼" FontSize="16"
                 Visibility="{Binding TopButtonVisible}"
                 Command="{Binding ButtonShowTopBarCommand}"
                 VerticalAlignment="Top" HorizontalAlignment="Right" />
         <!-- Video Infomation -->
-        <local:VideoInfomation Grid.Row="0" Panel.ZIndex="2" Margin="0,5" 
+        <local:VideoInfomation Grid.Row="1" Panel.ZIndex="2" Margin="0,10" 
                                Visibility="{Binding InfoVisible}"
                                x:Name="videoInfoControl" VerticalAlignment="Top" HorizontalAlignment="Center" />
         <!-- Video VideoControl -->
