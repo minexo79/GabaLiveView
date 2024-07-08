@@ -30,12 +30,6 @@ namespace GabaLiveView
         private VideoReceiveArgs receiveArgs = null;
 
         [ObservableProperty]
-        private int streamProtocol = App.StreamProtocol;
-
-        [ObservableProperty]
-        private string streamUrl = App.StreamUrl;
-
-        [ObservableProperty]
         private bool isButtonOpenEnabled = true;
 
         [ObservableProperty]
@@ -147,6 +141,15 @@ namespace GabaLiveView
             }
         }
 
+        SettingWindow settingWindow;
+
+        [RelayCommand]
+        public void MenuOpenSettings()
+        {
+            settingWindow = new SettingWindow();
+            settingWindow.Show();
+        }
+       
         [RelayCommand]
         public void MenuAbout()
         {
@@ -155,7 +158,7 @@ namespace GabaLiveView
         }
 
         [RelayCommand]
-        public void OpenRepo()
+        public void MenuOpenRepo()
         {
             Process.Start(new ProcessStartInfo
             {
