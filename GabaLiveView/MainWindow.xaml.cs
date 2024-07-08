@@ -20,7 +20,7 @@ namespace GabaLiveView
     /// </summary>
     public partial class MainWindow : Window
     {
-        MainWindowViewModel vm;
+        internal static MainWindowViewModel vm;
 
         public MainWindow()
         {
@@ -58,11 +58,7 @@ namespace GabaLiveView
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // save ini
-            IniOpreration iniOpreration = new IniOpreration();
-
-            iniOpreration.Write("StreamProtocol", vm.StreamProtocol.ToString());
-            iniOpreration.Write("StreamUrl", vm.StreamUrl);
+            // App.SaveIni();
         }
     }
 }

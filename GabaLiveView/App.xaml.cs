@@ -29,9 +29,11 @@ namespace GabaLiveView
         public static string ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         // Ini File
-        IniOpreration iniOpreration = new IniOpreration();
+        static IniOpreration iniOpreration = new IniOpreration();
         public static int StreamProtocol { get; set; } = 0;
         public static string StreamUrl { get; set; } = String.Empty;
+
+        public static string SavePath { get; set; } = String.Empty;
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -52,6 +54,7 @@ namespace GabaLiveView
         {
             string proto = iniOpreration.Read("StreamProtocol");
             StreamUrl = iniOpreration.Read("StreamUrl");
+            SavePath = iniOpreration.Read("SavePath");
 
             if (proto == String.Empty)
             {
@@ -64,9 +67,29 @@ namespace GabaLiveView
 
             if (StreamUrl == String.Empty)
             {
-                iniOpreration.Write("StreamUrl", "192.168.1.1:554/hello");
                 StreamUrl = "192.168.1.1:554/hello";
+                iniOpreration.Write("StreamUrl", StreamUrl);
             }
+
+            if (SavePath == String.Empty)
+            {
+                SavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GabaSave";
+                iniOpreration.Write("SavePath", SavePath);
+            }
+        }
+
+        internal static void SaveIni()
+        {
+            iniOpreration.Write("StreamProtocol", StreamProtocol.ToString());
+            iniOpreration.Write("StreamUrl", StreamUrl);
+            iniOpreration.Write("SavePath", SavePath);
+        }
+
+        internal static void SaveIni(int streamProto, string streamUrl, string savePath)
+        {
+            iniOpreration.Write("StreamProtocol", streamProto.ToString());
+            iniOpreration.Write("StreamUrl", streamUrl);
+            iniOpreration.Write("SavePath", savePath);
         }
     }
 }

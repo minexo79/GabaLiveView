@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:GabaLiveView"
         mc:Ignorable="d"
         Title="GabaLiveView" Height="720" Width="1080"
-        MinHeight="480" MinWidth="720"
+        MinHeight="480" MinWidth="800"
         Closing="Window_Closing">
     <Window.Resources>
         <Style x:Key="comboxStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
@@ -32,36 +32,46 @@
         <ui:CommandBar Grid.Row="0" VerticalContentAlignment="Center" Visibility="{Binding TopBarVisible}">
             <ui:CommandBar.Content>
                 <ui:SimpleStackPanel Orientation="Horizontal">
-                    <ComboBox x:Name="cbxSelect" SelectedIndex="{Binding StreamProtocol, Mode=TwoWay}" Style="{StaticResource comboxStyle}">
+                    <!--<ComboBox x:Name="cbxSelect" SelectedIndex="{Binding StreamProtocol, Mode=TwoWay}" Style="{StaticResource comboxStyle}">
                         <ComboBoxItem Content="rtsp" />
                         <ComboBoxItem Content="rtmp" />
                         <ComboBoxItem Content="hls" />
                     </ComboBox>
                     <TextBox x:Name="txtStreamInput" 
-                            Text="{Binding StreamUrl, Mode=TwoWay}" Width="260" Style="{StaticResource txtBoxStyle}" />
+                            Text="{Binding StreamUrl, Mode=TwoWay}" Width="260" Style="{StaticResource txtBoxStyle}" />-->
+                    <Menu x:Name="MainMenu">
+                        <MenuItem Header="File">
+                            <MenuItem Header="Settings" Command="{Binding MenuOpenSettingsCommand}" />
+                            <MenuItem Header="Exit" Command="{Binding MenuExitCommand}" />
+                        </MenuItem>
+                        <MenuItem Header="Help">
+                            <MenuItem Header="About" Command="{Binding MenuAboutCommand}" />
+                            <MenuItem Header="Open Github" Command="{Binding MenuOpenRepoCommand}" />
+                        </MenuItem>
+                    </Menu>
                 </ui:SimpleStackPanel>
             </ui:CommandBar.Content>
             <ui:AppBarButton Icon="Play" Label="Open" Command="{Binding ButtonOpenCommand}" IsEnabled="{Binding IsButtonOpenEnabled}" />
             <ui:AppBarButton Icon="Stop" Label="Stop" Command="{Binding ButtonStopCommand}" />
-            <ui:AppBarSeparator />
-            <ui:AppBarButton Label="Help">
+            <!--<ui:AppBarSeparator />-->
+            <!--<ui:AppBarButton Label="Help">
                 <ui:AppBarButton.Flyout>
                     <ui:MenuFlyout>
                         <MenuItem Header="About" Command="{Binding MenuAboutCommand}" />
                         <MenuItem Header="Open Github" Command="{Binding OpenRepoCommand}" />
                     </ui:MenuFlyout>
                 </ui:AppBarButton.Flyout>
-            </ui:AppBarButton>
+            </ui:AppBarButton>-->
             <ui:AppBarButton Icon="Up" Command="{Binding ButtonHideTopBarCommand}" />
         </ui:CommandBar>
         <!-- Show Top Bar -->
-        <Button Grid.Row="1" Panel.ZIndex="2" Margin="0,10,10,0"
-                Content="▼" FontSize="20"
+        <Button Grid.Row="0" Panel.ZIndex="2" Margin="0,5,10,0"
+                Content="▼" FontSize="16"
                 Visibility="{Binding TopButtonVisible}"
                 Command="{Binding ButtonShowTopBarCommand}"
                 VerticalAlignment="Top" HorizontalAlignment="Right" />
         <!-- Video Infomation -->
-        <local:VideoInfomation Grid.Row="1" Panel.ZIndex="2" Margin="0,10" 
+        <local:VideoInfomation Grid.Row="0" Panel.ZIndex="2" Margin="0,5" 
                                Visibility="{Binding InfoVisible}"
                                x:Name="videoInfoControl" VerticalAlignment="Top" HorizontalAlignment="Center" />
         <!-- Video VideoControl -->

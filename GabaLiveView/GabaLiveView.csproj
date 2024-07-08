@@ -17,6 +17,7 @@
     <None Remove="Resources\control\detect.png" />
     <None Remove="Resources\control\gallery.png" />
     <None Remove="Resources\control\photo-camera.png" />
+    <None Remove="Resources\control\rec-button.png" />
     <None Remove="Resources\format.png" />
     <None Remove="Resources\framerate.png" />
     <None Remove="Resources\info.png" />
@@ -44,6 +45,7 @@
     <Resource Include="Resources\control\gallery.png" />
     <Resource Include="Resources\control\detect.png" />
     <Resource Include="Resources\control\photo-camera.png" />
+    <Resource Include="Resources\control\rec-button.png" />
     <Resource Include="Resources\format.png" />
     <Resource Include="Resources\framerate.png" />
     <Resource Include="Resources\info.png" />
