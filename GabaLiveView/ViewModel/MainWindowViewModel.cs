@@ -23,7 +23,6 @@ namespace GabaLiveView
 {
     internal partial class MainWindowViewModel : ObservableObject, INotifyPropertyChanged
     {
-        IVideoCore videoCore;
         public bool isDrawing = false;
 
         [ObservableProperty]
@@ -54,8 +53,12 @@ namespace GabaLiveView
         private string videoFormat = "Unknown";
 
         [ObservableProperty]
+        private string videoRecording = "OFF";
+
+        [ObservableProperty]
         private string logMessage = "";
 
+        IVideoCore videoCore;
         Timer infoTimer = new Timer();
         DispatcherTimer refreshTimer;
         SKElement frontendCanvas;
@@ -187,6 +190,26 @@ namespace GabaLiveView
             TopButtonVisible = Visibility.Hidden;
         }
 
+        [RelayCommand]
+        public void ButtonPhotoClick()
+        {
+            ShowNotifyMessage("Photo Captured");
+        }
+
+        [RelayCommand]
+        public void ButtonRecordClick()
+        {
+            if (VideoRecording == "OFF")
+            {
+                VideoRecording = "ON";
+                ShowNotifyMessage("Recording Started");
+            }
+            else
+            {
+                VideoRecording = "OFF";
+                ShowNotifyMessage("Recording Stopped");
+            }
+        }
 
         private void videoCore_OnVideoReceived(object? sender, VideoReceiveArgs e)
         {
@@ -199,5 +222,17 @@ namespace GabaLiveView
             LogMessage = e.logMessage ?? "";
         }
 
+        private void ShowNotifyMessage(string msg)
+        {
+            // show notify message
+            NotifyMessage   = msg;
+            NotifyVisible   = Visibility.Visible;
+
+            // hide notify message after 1.5 seconds
+            Task.Delay(1500).ContinueWith(t =>
+            {
+                NotifyVisible = Visibility.Hidden;
+            });
+        }
     }
 }

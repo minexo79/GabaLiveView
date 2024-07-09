@@ -32,13 +32,6 @@
         <ui:CommandBar Grid.Row="0" VerticalContentAlignment="Center" Visibility="{Binding TopBarVisible}">
             <ui:CommandBar.Content>
                 <ui:SimpleStackPanel Orientation="Horizontal">
-                    <!--<ComboBox x:Name="cbxSelect" SelectedIndex="{Binding StreamProtocol, Mode=TwoWay}" Style="{StaticResource comboxStyle}">
-                        <ComboBoxItem Content="rtsp" />
-                        <ComboBoxItem Content="rtmp" />
-                        <ComboBoxItem Content="hls" />
-                    </ComboBox>
-                    <TextBox x:Name="txtStreamInput" 
-                            Text="{Binding StreamUrl, Mode=TwoWay}" Width="260" Style="{StaticResource txtBoxStyle}" />-->
                     <Menu x:Name="MainMenu">
                         <MenuItem Header="File">
                             <MenuItem Header="Settings" Command="{Binding MenuOpenSettingsCommand}" />
@@ -53,15 +46,6 @@
             </ui:CommandBar.Content>
             <ui:AppBarButton Icon="Play" Label="Open" Command="{Binding ButtonOpenCommand}" IsEnabled="{Binding IsButtonOpenEnabled}" />
             <ui:AppBarButton Icon="Stop" Label="Stop" Command="{Binding ButtonStopCommand}" />
-            <!--<ui:AppBarSeparator />-->
-            <!--<ui:AppBarButton Label="Help">
-                <ui:AppBarButton.Flyout>
-                    <ui:MenuFlyout>
-                        <MenuItem Header="About" Command="{Binding MenuAboutCommand}" />
-                        <MenuItem Header="Open Github" Command="{Binding OpenRepoCommand}" />
-                    </ui:MenuFlyout>
-                </ui:AppBarButton.Flyout>
-            </ui:AppBarButton>-->
             <ui:AppBarButton Icon="Up" Command="{Binding ButtonHideTopBarCommand}" />
         </ui:CommandBar>
         <!-- Show Top Bar -->
@@ -71,19 +55,23 @@
                 Command="{Binding ButtonShowTopBarCommand}"
                 VerticalAlignment="Top" HorizontalAlignment="Right" />
         <!-- Video Infomation -->
-        <local:VideoInfomation Grid.Row="1" Panel.ZIndex="2" Margin="0,10" 
+        <local:VideoInfomation Grid.Row="1" Panel.ZIndex="2" Margin="0,15" 
                                Visibility="{Binding InfoVisible}"
                                x:Name="videoInfoControl" VerticalAlignment="Top" HorizontalAlignment="Center" />
         <!-- Video VideoControl -->
         <local:VideoControl Grid.Row="1" Panel.ZIndex="2" Margin="0,0,10,0"
                             Visibility="{Binding InfoVisible}"
                             x:Name="videoOpControl" VerticalAlignment="Center" HorizontalAlignment="Right" />
+        <!-- Notify -->
+        <local:NotifyControl Grid.Row="1" Panel.ZIndex="2"  Margin="0,0,0,15"
+                             Visibility="{Binding NotifyVisible}" 
+                             x:Name="notifyControl" VerticalAlignment="Bottom" HorizontalAlignment="Center" />
         <!-- Video Showing -->
-        <views:SKElement Grid.Row="1" Panel.ZIndex="1"
+        <views:SKElement Grid.Row="1" Panel.ZIndex="1" Margin="0,10" 
                          x:Name="canvas" 
                          PaintSurface="canvas_PaintSurface" />
         <!-- App Icon -->
-        <Image Panel.ZIndex="0" Grid.Row="1" Source="/Resources/app.png" Width="256" />
+        <Image Panel.ZIndex="0" Grid.Row="1" Source="/Resources/intro.png" Width="768" />
         <!-- Status -->
         <StatusBar Grid.Row="2" VerticalAlignment="Center" Height="24">
             <StatusBarItem>

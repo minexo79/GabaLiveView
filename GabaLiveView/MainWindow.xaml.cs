@@ -28,8 +28,10 @@ namespace GabaLiveView
 
             vm = new MainWindowViewModel(ref canvas);
 
-            this.DataContext = vm;
-            videoInfoControl.DataContext = vm;
+            this.DataContext                = vm;
+            videoInfoControl.DataContext    = vm;
+            notifyControl.DataContext       = vm;
+            videoOpControl.DataContext      = vm;
         }
 
         private void canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)

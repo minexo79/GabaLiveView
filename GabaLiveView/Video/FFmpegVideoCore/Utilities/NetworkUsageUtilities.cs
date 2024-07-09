@@ -37,7 +37,7 @@ namespace GabaLiveView.Video.FFmpegVideoCore.Utilities
             }
 
             bytesReceivedCounter = new PerformanceCounter("Process", "IO Read Bytes/sec", instanceName);
-            bytesSentCounter    = new PerformanceCounter("Process", "IO Write Bytes/sec", instanceName);
+            bytesSentCounter     = new PerformanceCounter("Process", "IO Write Bytes/sec", instanceName);
 
             networkUsageTimer = new Timer();
             networkUsageTimer.Interval = 1000;

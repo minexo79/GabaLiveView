@@ -19,6 +19,8 @@
         <BitmapImage x:Key="imgVideoFps" UriSource="pack://application:,,,/Resources/framerate.png" />
         <BitmapImage x:Key="imgVideoFmt" UriSource="pack://application:,,,/Resources/format.png" />
         <BitmapImage x:Key="imgVideoBrt" UriSource="pack://application:,,,/Resources/bitrate.png" />
+        <BitmapImage x:Key="imgOnRecord" UriSource="pack://application:,,,/Resources/recording.png" />
+        <BitmapImage x:Key="imgOffRecord" UriSource="pack://application:,,,/Resources/offrecord.png" />
     </UserControl.Resources>
     <Grid VerticalAlignment="Center">
         <Border Background="#7F000000" CornerRadius="6">
@@ -26,7 +28,7 @@
                 <DropShadowEffect ShadowDepth="0" Opacity="1"/>
             </Border.Effect>
         </Border>
-        <ui:SimpleStackPanel Orientation="Horizontal">
+        <ui:SimpleStackPanel Orientation="Horizontal" Margin="5,0,5,0">
             <Image Source="{DynamicResource imgVideoRes}" />
             <Label Name="lblResolution" Style="{Binding lblStyle}" 
                    Content="{Binding VideoResolution}" Foreground="#EEEEEE" />
@@ -39,6 +41,10 @@
             <Image Source="{DynamicResource imgVideoBrt}" />
             <Label Name="lblBitrate" Style="{Binding lblStyle}" 
                    Content="{Binding VideoBitrate}" Foreground="#44C0FF" />
+            <Border Width="2" Background="White" Margin="5" />
+            <Image Source="{DynamicResource imgOffRecord}" />
+            <Label Name="lblRecording" Style="{Binding lblStyle}" 
+                   Content="{Binding VideoRecording}" Foreground="#EEEEEE" />
         </ui:SimpleStackPanel>
 
     </Grid>

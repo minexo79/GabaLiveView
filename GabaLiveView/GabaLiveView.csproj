@@ -21,6 +21,9 @@
     <None Remove="Resources\format.png" />
     <None Remove="Resources\framerate.png" />
     <None Remove="Resources\info.png" />
+    <None Remove="Resources\intro.png" />
+    <None Remove="Resources\offrecord.png" />
+    <None Remove="Resources\recording.png" />
     <None Remove="Resources\resolution.png" />
   </ItemGroup>
 
@@ -49,6 +52,9 @@
     <Resource Include="Resources\format.png" />
     <Resource Include="Resources\framerate.png" />
     <Resource Include="Resources\info.png" />
+    <Resource Include="Resources\intro.png" />
+    <Resource Include="Resources\offrecord.png" />
+    <Resource Include="Resources\recording.png" />
     <Resource Include="Resources\resolution.png" />
   </ItemGroup>
 

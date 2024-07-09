@@ -32,22 +32,24 @@
         <ui:SimpleStackPanel>
             <!-- AI Button -->
             <Button Name="btnAiDetect" Style="{StaticResource btnStyle}"
-                Background="#F4CE14">
+                    Background="#F4CE14">
                 <Image Source="{DynamicResource imgAiDetect}" />
             </Button>
-            <!-- Record Button -->
+            <!-- Photo Button -->
             <Button Name="btnPhoto" Style="{StaticResource btnStyle}" Height="86"
-                Background="#40FFFFFF">
+                    Command="{Binding ButtonPhotoClickCommand}"
+                    Background="#40FFFFFF">
                 <Image Source="{DynamicResource imgPhoto}" />
             </Button>
             <!-- Record Button -->
             <Button Name="btnRecord" Style="{StaticResource btnStyle}" Height="86"
-                Background="#40FFFFFF">
+                    Command="{Binding ButtonRecordClickCommand}"
+                    Background="#40FFFFFF">
                 <Image Source="{DynamicResource imgRecord}" />
             </Button>
             <!-- Gallery Button -->
             <Button Name="btnGallery" Style="{StaticResource btnStyle}"
-                Background="#088395">
+                    Background="#088395">
                 <Image Source="{DynamicResource imgGallery}" />
             </Button>
         </ui:SimpleStackPanel>

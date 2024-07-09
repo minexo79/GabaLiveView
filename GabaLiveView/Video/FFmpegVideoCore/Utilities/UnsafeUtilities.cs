@@ -11,7 +11,7 @@ namespace GabaLiveView.Video.FFmpegVideoCore.Utilities
     {
         public static string PtrToStringUTF8(byte* ptr)
         {
-            return ptr != null ? Marshal.PtrToStringUTF8(new IntPtr(ptr)) : "";
+            return ptr != null ? Marshal.PtrToStringUTF8(new IntPtr(ptr)).ToUpper() : "Unknown";
         }
     }
 }
